@@ -5,29 +5,37 @@
 
 // Hardcoded test trip with multiple stops
 const trip = {
-    teaser: "~25 min adventure • 3 stops",
+    teaser: "~20 min adventure • 4 stops",
     stops: [
         {
             id: "stop1",
-            name: "Seven Peaks Water Park",
-            coordinates: { lat: 40.2295, lng: -111.6586 },
-            recommendation: "Take a look at the lazy river from the overlook",
+            name: "Creative Dancemakers",
+            coordinates: { lat: 40.1780, lng: -111.6100 },
+            recommendation: "Watch the dancers warm up and feel the creative energy!",
             arrivalRadius: 75,
             isFinal: false
         },
         {
             id: "stop2",
-            name: "Rock Canyon Trailhead",
-            coordinates: { lat: 40.2553, lng: -111.6284 },
-            recommendation: "Enjoy the mountain views and fresh air",
+            name: "Hall Farm",
+            coordinates: { lat: 40.1650, lng: -111.6260 },
+            recommendation: "Be sure to check out the llamas!",
             arrivalRadius: 75,
             isFinal: false
         },
         {
-            id: "quarry",
-            name: "The Quarry at Slate Canyon",
-            coordinates: { lat: 40.2338, lng: -111.6585 },
-            description: "A hidden swimming spot locals love",
+            id: "stop3",
+            name: "Creative Dancemakers",
+            coordinates: { lat: 40.1780, lng: -111.6100 },
+            recommendation: "Time to pick up your dancer!",
+            arrivalRadius: 75,
+            isFinal: false
+        },
+        {
+            id: "home",
+            name: "Home",
+            coordinates: { lat: 40.2570, lng: -111.6350 },
+            description: "You made it! Time to relax.",
             arrivalRadius: 75,
             isFinal: true
         }
