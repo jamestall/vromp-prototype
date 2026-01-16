@@ -79,6 +79,15 @@ html, body {
 /* Navigation Screen */
 #nav-screen {
     flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#nav-screen.active {
+    display: flex;
 }
 
 /* Instruction Card */
@@ -153,8 +162,13 @@ html, body {
 
 /* Map */
 #map {
-    flex: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
+    height: 100%;
     background: #1a1a1a;
 }
 

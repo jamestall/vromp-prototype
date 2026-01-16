@@ -161,6 +161,11 @@ async function startTrip() {
     // Show navigation screen
     showScreen('nav');
 
+    // Tell Leaflet to recalculate map size
+    setTimeout(() => {
+        if (map) map.invalidateSize();
+    }, 100);
+
     // Fetch route
     try {
         const route = await fetchRoute(
