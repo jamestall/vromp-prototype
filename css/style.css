@@ -238,7 +238,49 @@ html, body {
     background: rgba(50, 50, 50, 0.85);
 }
 
-/* Arrival Screen */
+/* Intermediate Stop Screen */
+#stop-screen {
+    background: linear-gradient(135deg, #1a2e1a 0%, #16362e 100%);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.stop-content {
+    padding: 2rem;
+    max-width: 400px;
+}
+
+.stop-label {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.stop-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.stop-recommendation {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+}
+
+.stop-instruction {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+    margin-bottom: 2rem;
+}
+
+/* Final Arrival Screen */
 #arrival-screen {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     align-items: center;

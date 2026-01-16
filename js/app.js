@@ -3,17 +3,36 @@
  * Handles state management and app lifecycle
  */
 
-// Hardcoded test destinations
-const destinations = [
-    {
-        id: "quarry",
-        name: "The Quarry at Slate Canyon",
-        coordinates: { lat: 40.2338, lng: -111.6585 },
-        description: "A hidden swimming spot locals love",
-        teaser: "~15 min drive",
-        arrivalRadius: 75
-    }
-];
+// Hardcoded test trip with multiple stops
+const trip = {
+    teaser: "~25 min adventure • 3 stops",
+    stops: [
+        {
+            id: "stop1",
+            name: "Seven Peaks Water Park",
+            coordinates: { lat: 40.2295, lng: -111.6586 },
+            recommendation: "Take a look at the lazy river from the overlook",
+            arrivalRadius: 75,
+            isFinal: false
+        },
+        {
+            id: "stop2",
+            name: "Rock Canyon Trailhead",
+            coordinates: { lat: 40.2553, lng: -111.6284 },
+            recommendation: "Enjoy the mountain views and fresh air",
+            arrivalRadius: 75,
+            isFinal: false
+        },
+        {
+            id: "quarry",
+            name: "The Quarry at Slate Canyon",
+            coordinates: { lat: 40.2338, lng: -111.6585 },
+            description: "A hidden swimming spot locals love",
+            arrivalRadius: 75,
+            isFinal: true
+        }
+    ]
+};
 
 // App state
 const state = {
@@ -26,8 +45,11 @@ const state = {
     heading: null,
     accuracy: null,
 
+    // Multi-stop tracking
+    currentStopIndex: 0,
+    destination: null,  // Current stop we're navigating to
+
     // Route data
-    destination: null,
     routeGeometry: null,
     routeSteps: [],
     currentStepIndex: 0,
@@ -51,6 +73,7 @@ const state = {
 const screens = {
     start: document.getElementById('start-screen'),
     nav: document.getElementById('nav-screen'),
+    stop: document.getElementById('stop-screen'),
     arrival: document.getElementById('arrival-screen'),
     error: document.getElementById('error-screen')
 };
@@ -61,13 +84,14 @@ const screens = {
 function init() {
     console.log('Vromp initializing...');
 
-    // Set up destination
-    state.destination = destinations[0];
+    // Set up first stop as initial destination
+    state.currentStopIndex = 0;
+    state.destination = trip.stops[0];
 
     // Update teaser text
     const teaserEl = document.getElementById('teaser-text');
-    if (teaserEl && state.destination.teaser) {
-        teaserEl.textContent = state.destination.teaser;
+    if (teaserEl && trip.teaser) {
+        teaserEl.textContent = trip.teaser;
     }
 
     // Initialize map
@@ -92,7 +116,10 @@ function setupEventListeners() {
     // End button
     document.getElementById('end-btn').addEventListener('click', endTrip);
 
-    // Done button (arrival screen)
+    // Continue button (intermediate stop screen)
+    document.getElementById('continue-btn').addEventListener('click', continueToNextStop);
+
+    // Done button (final arrival screen)
     document.getElementById('done-btn').addEventListener('click', resetApp);
 
     // Retry button (error screen)
@@ -329,33 +356,87 @@ async function handleReroute() {
  * Trigger arrival sequence
  */
 function triggerArrival() {
-    console.log('Arrived at destination!');
+    const currentStop = state.destination;
+    console.log(`Arrived at ${currentStop.name}!`);
 
     state.tripActive = false;
     state.arrived = true;
-
-    // Stop watching position
-    if (state.watchId) {
-        navigator.geolocation.clearWatch(state.watchId);
-        state.watchId = null;
-    }
 
     // Clear route line
     clearRouteLine();
 
     // Show destination marker
     addDestinationMarker(
-        state.destination.coordinates.lat,
-        state.destination.coordinates.lng,
-        state.destination.name
+        currentStop.coordinates.lat,
+        currentStop.coordinates.lng,
+        currentStop.name
     );
 
-    // Update arrival screen
-    document.getElementById('destination-name').textContent = state.destination.name;
-    document.getElementById('destination-description').textContent = state.destination.description;
+    if (currentStop.isFinal) {
+        // Final destination - show full arrival screen
+        // Stop watching position
+        if (state.watchId) {
+            navigator.geolocation.clearWatch(state.watchId);
+            state.watchId = null;
+        }
 
-    // Show arrival screen
-    showScreen('arrival');
+        document.getElementById('destination-name').textContent = currentStop.name;
+        document.getElementById('destination-description').textContent = currentStop.description || '';
+        showScreen('arrival');
+    } else {
+        // Intermediate stop - show stop screen with continue option
+        const stopNumber = state.currentStopIndex + 1;
+        document.getElementById('stop-label').textContent = `Welcome to Stop ${stopNumber}`;
+        document.getElementById('stop-name').textContent = currentStop.name;
+        document.getElementById('stop-recommendation').textContent = `We recommend: ${currentStop.recommendation}`;
+        showScreen('stop');
+    }
+}
+
+/**
+ * Continue to the next stop
+ */
+async function continueToNextStop() {
+    console.log('Continuing to next stop...');
+
+    // Advance to next stop
+    state.currentStopIndex++;
+    state.destination = trip.stops[state.currentStopIndex];
+    state.arrived = false;
+
+    console.log(`Now navigating to: ${state.destination.name}`);
+
+    // Show navigation screen
+    showScreen('nav');
+
+    // Tell Leaflet to recalculate map size
+    setTimeout(() => {
+        if (map) map.invalidateSize();
+    }, 100);
+
+    // Fetch new route to next stop
+    try {
+        const route = await fetchRoute(
+            state.currentPosition.lat,
+            state.currentPosition.lng,
+            state.destination.coordinates.lat,
+            state.destination.coordinates.lng
+        );
+
+        state.routeGeometry = route.geometry;
+        state.routeSteps = route.steps;
+        state.currentStepIndex = 0;
+        state.tripActive = true;
+
+        console.log(`Route to ${state.destination.name}: ${route.steps.length} steps, ${formatDistance(route.distance)}`);
+
+        // Update UI
+        updateNavigationUI();
+
+    } catch (error) {
+        console.error('Failed to fetch route:', error);
+        showError('Route Error', 'Could not calculate route to next stop. Please check your connection and try again.');
+    }
 }
 
 /**
@@ -381,6 +462,8 @@ function endTrip() {
 function resetApp() {
     state.tripActive = false;
     state.arrived = false;
+    state.currentStopIndex = 0;
+    state.destination = trip.stops[0];
     state.routeGeometry = null;
     state.routeSteps = [];
     state.currentStepIndex = 0;
