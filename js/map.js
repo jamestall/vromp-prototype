@@ -24,7 +24,11 @@ const MAP_CONFIG = {
 function initMap(containerId) {
     map = L.map(containerId, {
         zoomControl: false,
-        attributionControl: true
+        attributionControl: true,
+        rotate: true,
+        rotateControl: false,
+        touchRotate: false,
+        bearing: 0
     }).setView([0, 0], MAP_CONFIG.defaultZoom);
 
     L.tileLayer(MAP_CONFIG.tileUrl, {
@@ -55,6 +59,9 @@ function initMap(containerId) {
     console.log('Map initialized');
 }
 
+// Track last known heading for smooth updates
+let lastHeading = null;
+
 /**
  * Update the user's position on the map
  * @param {number} lat - Latitude
@@ -78,11 +85,14 @@ function updateUserPosition(lat, lng, heading, accuracy) {
     accuracyCircle.setLatLng(latlng);
     accuracyCircle.setRadius(accuracy);
 
-    // Rotate arrow if heading is available
-    if (heading !== null && heading !== undefined) {
-        const arrowEl = document.getElementById('user-arrow');
-        if (arrowEl) {
-            arrowEl.style.transform = `rotate(${heading}deg)`;
+    // Handle heading/rotation
+    if (heading !== null && heading !== undefined && !isNaN(heading)) {
+        lastHeading = heading;
+
+        // Rotate the map so direction of travel is "up"
+        // Map bearing is opposite of heading (we rotate map, not marker)
+        if (map.setBearing) {
+            map.setBearing(-heading);
         }
     }
 

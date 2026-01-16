@@ -349,7 +349,7 @@ html, body {
     border-right: 12px solid transparent;
     border-bottom: 24px solid #4a90d9;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    transition: transform 0.3s ease;
+    /* Arrow always points up since map rotates */
 }
 
 .user-arrow-container {
