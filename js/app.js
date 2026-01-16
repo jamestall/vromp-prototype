@@ -111,6 +111,8 @@ function requestLocationPermission() {
         return;
     }
 
+    console.log('Requesting location permission...');
+
     // Just get one position to trigger permission prompt
     navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -118,10 +120,13 @@ function requestLocationPermission() {
             updatePosition(position);
         },
         (error) => {
-            console.warn('Location permission denied or error:', error.message);
-            // Don't show error screen yet - they might grant permission on trip start
+            console.warn('Location permission denied or error:', error.code, error.message);
+            // Show error so user knows what's happening
+            if (error.code === error.PERMISSION_DENIED) {
+                showError('Location Required', 'Please allow location access. On iOS: Settings → Safari → Location → Allow. Then reload this page.');
+            }
         },
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true, timeout: 10000 }
     );
 }
 
