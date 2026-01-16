@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Vromp</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- App CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen active">
+        <div class="start-content">
+            <div class="start-icon">🚗</div>
+            <h1>Ready for an adventure?</h1>
+            <button id="start-btn" class="primary-btn">Start Mystery Trip</button>
+            <p class="teaser" id="teaser-text">~15 min drive</p>
+        </div>
+    </div>
+
+    <!-- Navigation Screen -->
+    <div id="nav-screen" class="screen">
+        <!-- Instruction Card (top overlay) -->
+        <div id="instruction-card">
+            <div class="instruction-content">
+                <div class="maneuver-icon" id="maneuver-icon">↑</div>
+                <div class="instruction-text">
+                    <div class="road-name" id="road-name">Waiting for location...</div>
+                    <div class="distance" id="distance-to-turn"></div>
+                </div>
+            </div>
+            <div class="recalculating" id="recalculating">
+                <span class="spinner"></span> Recalculating...
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div id="map"></div>
+
+        <!-- Bottom Controls -->
+        <div id="bottom-controls">
+            <div class="trip-stats" id="trip-stats">
+                <div class="stat-value" id="time-remaining">--</div>
+                <div class="stat-label" id="distance-remaining">--</div>
+            </div>
+            <button class="end-btn" id="end-btn">✕</button>
+        </div>
+    </div>
+
+    <!-- Arrival Screen -->
+    <div id="arrival-screen" class="screen">
+        <div class="arrival-content">
+            <p class="arrival-label">You've arrived at...</p>
+            <h1 class="destination-name" id="destination-name"></h1>
+            <p class="destination-description" id="destination-description"></p>
+            <button id="done-btn" class="primary-btn">Done</button>
+        </div>
+    </div>
+
+    <!-- Error/Permission Screen -->
+    <div id="error-screen" class="screen">
+        <div class="error-content">
+            <div class="error-icon">📍</div>
+            <h2 id="error-title">Location Required</h2>
+            <p id="error-message">Vromp needs your location to guide you. Please enable location access and try again.</p>
+            <button id="retry-btn" class="primary-btn">Try Again</button>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- App JS -->
+    <script src="js/utils.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/routing.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

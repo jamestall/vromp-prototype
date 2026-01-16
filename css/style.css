@@ -1,0 +1,316 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a1a;
+    color: #fff;
+    overflow: hidden;
+}
+
+/* Screen management */
+.screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* Start Screen */
+#start-screen {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.start-content {
+    padding: 2rem;
+}
+
+.start-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+}
+
+.start-content h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+}
+
+.primary-btn {
+    background: #4a90d9;
+    color: #fff;
+    border: none;
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.primary-btn:hover {
+    background: #3a7bc8;
+}
+
+.primary-btn:active {
+    background: #2d6cb5;
+}
+
+.teaser {
+    margin-top: 1.5rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+}
+
+/* Navigation Screen */
+#nav-screen {
+    flex-direction: column;
+}
+
+/* Instruction Card */
+#instruction-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 1rem;
+    padding-top: calc(env(safe-area-inset-top) + 1rem);
+}
+
+.instruction-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.maneuver-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.instruction-text {
+    flex: 1;
+}
+
+.road-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.distance {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.recalculating {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.recalculating.active {
+    display: flex;
+}
+
+.recalculating.active + .instruction-content {
+    display: none;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Map */
+#map {
+    flex: 1;
+    width: 100%;
+    background: #1a1a1a;
+}
+
+/* Bottom Controls */
+#bottom-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+}
+
+.trip-stats {
+    background: rgba(0, 0, 0, 0.75);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.end-btn {
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.end-btn:hover {
+    background: rgba(50, 50, 50, 0.85);
+}
+
+/* Arrival Screen */
+#arrival-screen {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.arrival-content {
+    padding: 2rem;
+    max-width: 400px;
+}
+
+.arrival-label {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.5rem;
+}
+
+.destination-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.destination-description {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+    margin-bottom: 2rem;
+}
+
+/* Error Screen */
+#error-screen {
+    background: linear-gradient(135deg, #2a1a1a 0%, #1a1a1a 100%);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.error-content {
+    padding: 2rem;
+    max-width: 350px;
+}
+
+.error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.error-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.error-content p {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+/* User position arrow marker */
+.user-arrow {
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 24px solid #4a90d9;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.user-arrow-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Accuracy circle */
+.accuracy-circle {
+    background: rgba(74, 144, 217, 0.15);
+    border: 2px solid rgba(74, 144, 217, 0.4);
+    border-radius: 50%;
+}
+
+/* Route line styles */
+.route-line {
+    stroke: #4a90d9;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 8, 12;
+    opacity: 0.8;
+}
+
+/* Leaflet overrides for dark theme */
+.leaflet-container {
+    background: #1a1a1a;
+}
+
+.leaflet-control-attribution {
+    background: rgba(0, 0, 0, 0.6) !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 10px;
+}
+
+.leaflet-control-attribution a {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
