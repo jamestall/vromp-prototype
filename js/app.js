@@ -5,37 +5,29 @@
 
 // Hardcoded test trip with multiple stops
 const trip = {
-    teaser: "~20 min adventure • 4 stops",
+    teaser: "~25 min adventure • 3 stops",
     stops: [
         {
             id: "stop1",
-            name: "Creative Dancemakers",
-            coordinates: { lat: 40.1780, lng: -111.6100 },
-            recommendation: "Watch the dancers warm up and feel the creative energy!",
+            name: "Wheeler Historic Farm",
+            coordinates: { lat: 40.63634395935377, lng: -111.86395501783551 },
+            recommendation: "Welcome to the farm, enjoy your walk!",
             arrivalRadius: 75,
             isFinal: false
         },
         {
             id: "stop2",
-            name: "Hall Farm",
-            coordinates: { lat: 40.1650, lng: -111.6260 },
-            recommendation: "Be sure to check out the llamas!",
+            name: "Zeitoon Cafe - Aria Palace",
+            coordinates: { lat: 40.62230158897169, lng: -111.87065689963451 },
+            recommendation: "Kabob time! Remember not to whine Gwen!",
             arrivalRadius: 75,
             isFinal: false
         },
         {
             id: "stop3",
-            name: "Creative Dancemakers",
-            coordinates: { lat: 40.1780, lng: -111.6100 },
-            recommendation: "Time to pick up your dancer!",
-            arrivalRadius: 75,
-            isFinal: false
-        },
-        {
-            id: "home",
-            name: "Home",
-            coordinates: { lat: 40.2570, lng: -111.6350 },
-            description: "You made it! Time to relax.",
+            name: "Tous les Jours",
+            coordinates: { lat: 40.62148941970681, lng: -111.88978350589251 },
+            description: "Let's grab a tasty pastry for the drive home!",
             arrivalRadius: 75,
             isFinal: true
         }

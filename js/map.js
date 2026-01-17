@@ -101,24 +101,15 @@ function updateUserPosition(lat, lng, heading, accuracy) {
 }
 
 /**
- * Center the map on the user's position with offset
- * User appears in lower third of screen to show more road ahead
+ * Center the map on the user's position
+ * When map is rotated, we center directly on user to avoid drift
  * @param {number} lat - Latitude
  * @param {number} lng - Longitude
  */
 function centerMapOnUser(lat, lng) {
-    const mapSize = map.getSize();
-    const offset = mapSize.y * 0.2; // Offset by 20% of map height
-
-    // Get the pixel position for the user's location
-    const targetPoint = map.project(L.latLng(lat, lng), map.getZoom());
-
-    // Offset the target point to move user to lower third
-    targetPoint.y += offset;
-
-    // Convert back to lat/lng and pan
-    const targetLatLng = map.unproject(targetPoint, map.getZoom());
-    map.panTo(targetLatLng, { animate: true, duration: 0.5 });
+    // Simple center - works correctly with map rotation
+    // The offset approach causes drift when map rotates
+    map.setView([lat, lng], map.getZoom(), { animate: true, duration: 0.3 });
 }
 
 /**
