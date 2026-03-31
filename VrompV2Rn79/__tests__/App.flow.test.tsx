@@ -34,7 +34,7 @@ describe('App flow', () => {
 
     await waitFor(() => {
       expect(getByText('Ready to start?')).toBeTruthy();
-      expect(getByText('Let’s Go')).toBeTruthy();
+      expect(getByText("Let's Go")).toBeTruthy();
     });
   });
 
@@ -46,10 +46,10 @@ describe('App flow', () => {
     fireEvent.press(getByText('Kemmerer → Cody'));
 
     await waitFor(() => {
-      expect(getByText('Let’s Go')).toBeTruthy();
+      expect(getByText("Let's Go")).toBeTruthy();
     });
 
-    fireEvent.press(getByText('Let’s Go'));
+    fireEvent.press(getByText("Let's Go"));
 
     await waitFor(() => {
       expect(navModule.__mockNavigationController.setDestinations).toHaveBeenCalled();

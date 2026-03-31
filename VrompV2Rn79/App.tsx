@@ -291,32 +291,50 @@ function TripPlayer({
   }, [tripState, navigationController, persistProgress, currentStopIndex, visitedStops]);
 
   const startGuidanceToCurrentStop = useCallback(async () => {
-    if (!currentStop || !isNavReady) {
+    if (isBusy) {
       return;
     }
 
+    if (!currentStop || !isNavReady) {
+      Alert.alert('Navigation not ready', 'Please wait a moment and try again.');
+      return;
+    }
+
+    const withTimeout = async <T,>(promise: Promise<T>, label: string): Promise<T> => {
+      return Promise.race([
+        promise,
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`${label} timed out. Please try again.`)), 15000),
+        ),
+      ]);
+    };
+
     setIsBusy(true);
     try {
-      await navigationController.setDestinations(
-        [
+      await withTimeout(
+        navigationController.setDestinations(
+          [
+            {
+              title: currentStop.id,
+              position: {lat: currentStop.latitude, lng: currentStop.longitude},
+            },
+          ],
           {
-            title: currentStop.id,
-            position: {lat: currentStop.latitude, lng: currentStop.longitude},
+            travelMode: TravelMode.DRIVING,
+            avoidFerries: false,
+            avoidTolls: false,
+            avoidHighways: false,
           },
-        ],
-        {
-          travelMode: TravelMode.DRIVING,
-          avoidFerries: false,
-          avoidTolls: false,
-          avoidHighways: false,
-        },
-        {
-          showDestinationMarkers: false,
-          showStopSigns: true,
-          showTrafficLights: true,
-        },
+          {
+            showDestinationMarkers: false,
+            showStopSigns: true,
+            showTrafficLights: true,
+          },
+        ),
+        'Route planning',
       );
-      await navigationController.startGuidance();
+
+      await withTimeout(navigationController.startGuidance(), 'Guidance start');
 
       // Reset tracking state
       lastPositionRef.current = null;
@@ -333,6 +351,7 @@ function TripPlayer({
   }, [
     currentStop,
     currentStopIndex,
+    isBusy,
     isNavReady,
     navigationController,
     persistProgress,
