@@ -309,8 +309,7 @@ function TripPlayer({
       ]);
     };
 
-    setIsBusy(true);
-    try {
+    const planAndStart = async () => {
       const waypoint = {
         title: currentStop.id,
         position: {lat: currentStop.latitude, lng: currentStop.longitude},
@@ -329,7 +328,6 @@ function TripPlayer({
         showTrafficLights: true,
       };
 
-      // Prefer single-destination API for reliability, fallback to setDestinations.
       if (typeof navigationController.setDestination === 'function') {
         await withTimeout(
           navigationController.setDestination(waypoint, routingOptions, displayOptions),
@@ -343,6 +341,16 @@ function TripPlayer({
       }
 
       await withTimeout(navigationController.startGuidance(), 'Guidance start');
+    };
+
+    setIsBusy(true);
+    try {
+      // Ensure we have a fresh location lock before route planning.
+      if (mapControllerRef.current?.getMyLocation) {
+        await withTimeout(mapControllerRef.current.getMyLocation(), 'Location fix');
+      }
+
+      await planAndStart();
 
       // Reset tracking state
       lastPositionRef.current = null;
@@ -352,6 +360,22 @@ function TripPlayer({
       setTripState('NAVIGATING');
       await persistProgress(currentStopIndex, visitedStops);
     } catch (error) {
+      // One hard reset + retry to recover stuck native navigation state.
+      try {
+        await withTimeout(navigationController.cleanup(), 'Navigation reset');
+        await withTimeout(navigationController.init(), 'Navigation re-init');
+        await planAndStart();
+
+        lastPositionRef.current = null;
+        lowSpeedStartRef.current = null;
+        setIsNearStop(false);
+        setTripState('NAVIGATING');
+        await persistProgress(currentStopIndex, visitedStops);
+        return;
+      } catch (retryError) {
+        Alert.alert('Route start failed', String(retryError));
+      }
+
       Alert.alert('Route start failed', String(error));
     } finally {
       setIsBusy(false);
