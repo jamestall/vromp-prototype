@@ -311,28 +311,36 @@ function TripPlayer({
 
     setIsBusy(true);
     try {
-      await withTimeout(
-        navigationController.setDestinations(
-          [
-            {
-              title: currentStop.id,
-              position: {lat: currentStop.latitude, lng: currentStop.longitude},
-            },
-          ],
-          {
-            travelMode: TravelMode.DRIVING,
-            avoidFerries: false,
-            avoidTolls: false,
-            avoidHighways: false,
-          },
-          {
-            showDestinationMarkers: false,
-            showStopSigns: true,
-            showTrafficLights: true,
-          },
-        ),
-        'Route planning',
-      );
+      const waypoint = {
+        title: currentStop.id,
+        position: {lat: currentStop.latitude, lng: currentStop.longitude},
+      };
+
+      const routingOptions = {
+        travelMode: TravelMode.DRIVING,
+        avoidFerries: false,
+        avoidTolls: false,
+        avoidHighways: false,
+      };
+
+      const displayOptions = {
+        showDestinationMarkers: false,
+        showStopSigns: true,
+        showTrafficLights: true,
+      };
+
+      // Prefer single-destination API for reliability, fallback to setDestinations.
+      if (typeof navigationController.setDestination === 'function') {
+        await withTimeout(
+          navigationController.setDestination(waypoint, routingOptions, displayOptions),
+          'Route planning',
+        );
+      } else {
+        await withTimeout(
+          navigationController.setDestinations([waypoint], routingOptions, displayOptions),
+          'Route planning',
+        );
+      }
 
       await withTimeout(navigationController.startGuidance(), 'Guidance start');
 
