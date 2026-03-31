@@ -41,8 +41,20 @@ describe('trips data integrity', () => {
         for (const stop of day.stops) {
           expect(typeof stop.name).toBe('string');
           expect(stop.name.length).toBeGreaterThan(0);
-          expect(typeof stop.description).toBe('string');
-          expect(stop.description.length).toBeGreaterThan(0);
+          expect(typeof stop.hook).toBe('string');
+          expect(stop.hook.length).toBeGreaterThan(0);
+          expect(typeof stop.subtitle).toBe('string');
+          expect(typeof stop.revealEmoji).toBe('string');
+          expect(stop.revealEmoji.length).toBeGreaterThan(0);
+          expect(typeof stop.context).toBe('string');
+          expect(stop.context.length).toBeGreaterThan(0);
+          expect(Array.isArray(stop.whatToDo)).toBe(true);
+          expect(stop.whatToDo.length).toBeGreaterThan(0);
+          expect(Array.isArray(stop.proTips)).toBe(true);
+          expect(stop.proTips.length).toBeGreaterThan(0);
+          expect(typeof stop.suggestedDuration).toBe('string');
+          expect(typeof stop.costNote).toBe('string');
+          expect(typeof stop.hoursToday).toBe('string');
 
           expect(stop.latitude).toBeGreaterThanOrEqual(-90);
           expect(stop.latitude).toBeLessThanOrEqual(90);

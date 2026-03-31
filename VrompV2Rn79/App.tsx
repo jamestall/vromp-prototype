@@ -20,19 +20,26 @@ import {
 } from '@googlemaps/react-native-navigation-sdk';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {TRIPS, type TripDay, type TripFamily} from './trips';
+import RevealScreen from './RevealScreen';
 
 const PROGRESS_KEY = 'vromp.progress.v1';
+
+// Velocity trigger constants
+const NEAR_STOP_RADIUS_METERS = 150;
+const LOW_SPEED_THRESHOLD_MS = 2.2; // 5 mph in m/s
+const LOW_SPEED_DURATION_MS = 15000;
 
 type DayProgress = {
   currentStopIndex: number;
   visitedStops: string[];
   startedAt: string;
+  tripState?: string; // persist EXPLORING so we can resume without replaying animation
 };
 
 type ProgressMap = Record<string, DayProgress>;
 
 type AppScreen = 'SPLASH' | 'FAMILY' | 'DAY' | 'TRIP';
-type TripState = 'IDLE' | 'NAVIGATING' | 'ARRIVING' | 'REVEALED' | 'TRIP_COMPLETE';
+type TripState = 'IDLE' | 'NAVIGATING' | 'REVEALING' | 'EXPLORING' | 'TRIP_COMPLETE';
 
 async function ensureLocationPermission(): Promise<boolean> {
   try {
@@ -146,17 +153,20 @@ function TripPlayer({
   const [tripState, setTripState] = useState<TripState>('IDLE');
   const [currentStopIndex, setCurrentStopIndex] = useState(0);
   const [visitedStops, setVisitedStops] = useState<string[]>([]);
-  const [, setStatusText] = useState('Ready to start today’s adventure.');
   const [isNavReady, setIsNavReady] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [resumeChecked, setResumeChecked] = useState(false);
-  const [, setConsecutiveInRadius] = useState(0);
+  const [isNearStop, setIsNearStop] = useState(false);
   const mapControllerRef = useRef<any>(null);
+
+  // Velocity tracking refs (not state — no re-render needed)
+  const lastPositionRef = useRef<{lat: number; lng: number; time: number} | null>(null);
+  const lowSpeedStartRef = useRef<number | null>(null);
 
   const currentStop = day.stops[currentStopIndex];
 
   const persistProgress = useCallback(
-    async (nextIndex: number, nextVisited: string[]) => {
+    async (nextIndex: number, nextVisited: string[], state?: string) => {
       const raw = await AsyncStorage.getItem(PROGRESS_KEY);
       const current = raw ? (JSON.parse(raw) as ProgressMap) : {};
 
@@ -164,6 +174,7 @@ function TripPlayer({
         currentStopIndex: nextIndex,
         visitedStops: nextVisited,
         startedAt: current[day.id]?.startedAt ?? new Date().toISOString(),
+        tripState: state,
       };
 
       await AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(current));
@@ -183,12 +194,9 @@ function TripPlayer({
 
   const initNavigation = useCallback(async () => {
     try {
-      setStatusText('Initializing navigation…');
       await navigationController.init();
       setIsNavReady(true);
-      setStatusText('Navigation ready.');
     } catch (error) {
-      setStatusText(`Navigation init failed: ${String(error)}`);
       Alert.alert('Navigation init failed', String(error));
     }
   }, [navigationController]);
@@ -197,8 +205,13 @@ function TripPlayer({
     initNavigation();
   }, [initNavigation]);
 
+  // KeepAwake during NAVIGATING, REVEALING, and EXPLORING
   useEffect(() => {
-    if (tripState === 'NAVIGATING') {
+    if (
+      tripState === 'NAVIGATING' ||
+      tripState === 'REVEALING' ||
+      tripState === 'EXPLORING'
+    ) {
       KeepAwake.activate();
     } else {
       KeepAwake.deactivate();
@@ -209,6 +222,7 @@ function TripPlayer({
     };
   }, [tripState]);
 
+  // Load saved progress on mount
   useEffect(() => {
     const loadProgress = async () => {
       const raw = await AsyncStorage.getItem(PROGRESS_KEY);
@@ -224,7 +238,6 @@ function TripPlayer({
         setVisitedStops(dayProgress.visitedStops);
         setCurrentStopIndex(day.stops.length);
         setTripState('TRIP_COMPLETE');
-        setStatusText('Trip already completed.');
         setResumeChecked(true);
         return;
       }
@@ -246,7 +259,15 @@ function TripPlayer({
           onPress: () => {
             setVisitedStops(dayProgress.visitedStops);
             setCurrentStopIndex(dayProgress.currentStopIndex);
-            setTripState('IDLE');
+            // If was in REVEALING/EXPLORING, resume to EXPLORING (skip animation replay)
+            if (
+              dayProgress.tripState === 'REVEALING' ||
+              dayProgress.tripState === 'EXPLORING'
+            ) {
+              setTripState('EXPLORING');
+            } else {
+              setTripState('IDLE');
+            }
             setResumeChecked(true);
           },
         },
@@ -255,6 +276,19 @@ function TripPlayer({
 
     loadProgress().catch(() => setResumeChecked(true));
   }, [clearProgress, day.id, day.stops.length]);
+
+  const triggerReveal = useCallback(async () => {
+    if (tripState !== 'NAVIGATING') {
+      return;
+    }
+    try {
+      await navigationController.stopGuidance();
+    } catch {
+      // Guidance may already be stopped
+    }
+    setTripState('REVEALING');
+    await persistProgress(currentStopIndex, visitedStops, 'REVEALING');
+  }, [tripState, navigationController, persistProgress, currentStopIndex, visitedStops]);
 
   const startGuidanceToCurrentStop = useCallback(async () => {
     if (!currentStop || !isNavReady) {
@@ -283,11 +317,15 @@ function TripPlayer({
         },
       );
       await navigationController.startGuidance();
+
+      // Reset tracking state
+      lastPositionRef.current = null;
+      lowSpeedStartRef.current = null;
+      setIsNearStop(false);
+
       setTripState('NAVIGATING');
-      setStatusText(`Navigating to stop ${currentStopIndex + 1} of ${day.stops.length}`);
       await persistProgress(currentStopIndex, visitedStops);
     } catch (error) {
-      setStatusText(`Route start failed: ${String(error)}`);
       Alert.alert('Route start failed', String(error));
     } finally {
       setIsBusy(false);
@@ -295,13 +333,13 @@ function TripPlayer({
   }, [
     currentStop,
     currentStopIndex,
-    day.stops.length,
     isNavReady,
     navigationController,
     persistProgress,
     visitedStops,
   ]);
 
+  // Velocity-based arrival detection polling
   useEffect(() => {
     if (tripState !== 'NAVIGATING' || !currentStop || !mapControllerRef.current) {
       return;
@@ -316,43 +354,67 @@ function TripPlayer({
           return;
         }
 
+        const now = Date.now();
         const meters = haversineMeters(
           {lat, lng},
           {lat: currentStop.latitude, lng: currentStop.longitude},
         );
 
-        if (meters <= currentStop.arrivalRadiusMeters) {
-          setConsecutiveInRadius(prev => {
-            const next = prev + 1;
-            if (next >= 3) {
-              setTripState('ARRIVING');
-              setStatusText('You have arrived at a mystery stop…');
-            }
-            return next;
-          });
+        if (meters > NEAR_STOP_RADIUS_METERS) {
+          // Outside geofence — reset everything
+          setIsNearStop(false);
+          lowSpeedStartRef.current = null;
         } else {
-          setConsecutiveInRadius(0);
+          // Inside 150m geofence
+          setIsNearStop(true);
+
+          // Compute speed from last position
+          const prev = lastPositionRef.current;
+          if (prev) {
+            const dt = (now - prev.time) / 1000; // seconds
+            if (dt > 0) {
+              const dist = haversineMeters({lat, lng}, {lat: prev.lat, lng: prev.lng});
+              const speed = dist / dt; // m/s
+
+              if (speed < LOW_SPEED_THRESHOLD_MS) {
+                if (lowSpeedStartRef.current === null) {
+                  lowSpeedStartRef.current = now;
+                } else if (now - lowSpeedStartRef.current >= LOW_SPEED_DURATION_MS) {
+                  // Stationary for 15s within geofence — trigger reveal
+                  triggerReveal();
+                  return;
+                }
+              } else {
+                // Moving too fast — reset timer
+                lowSpeedStartRef.current = null;
+              }
+            }
+          }
         }
+
+        lastPositionRef.current = {lat, lng, time: now};
       } catch {
-        // Ignore transient GPS errors.
+        // Ignore transient GPS errors
       }
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [currentStop, tripState]);
+  }, [currentStop, tripState, triggerReveal]);
 
+  // Transition from REVEALING to EXPLORING (RevealScreen animation handles itself;
+  // we just persist the state so resume works)
   useEffect(() => {
-    if (tripState !== 'ARRIVING') {
-      return;
+    if (tripState === 'REVEALING') {
+      // After a short delay, mark as EXPLORING in persistence
+      // The RevealScreen IS the exploring mode once animation finishes
+      const t = setTimeout(async () => {
+        setTripState('EXPLORING');
+        await persistProgress(currentStopIndex, visitedStops, 'EXPLORING');
+      }, 3000); // slightly after animation completes (~2.5s total)
+
+      return () => clearTimeout(t);
     }
-
-    const t = setTimeout(() => {
-      setTripState('REVEALED');
-      setStatusText('Mystery revealed.');
-    }, 1500);
-
-    return () => clearTimeout(t);
-  }, [tripState]);
+  }, [tripState, persistProgress, currentStopIndex, visitedStops]);
 
   const continueJourney = async () => {
     if (!currentStop) {
@@ -363,20 +425,26 @@ function TripPlayer({
     const nextIndex = currentStopIndex + 1;
 
     setVisitedStops(nextVisited);
-    setConsecutiveInRadius(0);
+
+    // Reset tracking
+    lastPositionRef.current = null;
+    lowSpeedStartRef.current = null;
+    setIsNearStop(false);
 
     if (nextIndex >= day.stops.length) {
       setTripState('TRIP_COMPLETE');
-      setStatusText('You’ve arrived! End of today’s adventure.');
       await persistProgress(nextIndex, nextVisited);
-      await navigationController.stopGuidance();
+      try {
+        await navigationController.stopGuidance();
+      } catch {
+        // Already stopped
+      }
       return;
     }
 
     setCurrentStopIndex(nextIndex);
     await persistProgress(nextIndex, nextVisited);
     setTripState('IDLE');
-    setStatusText('Ready for the next stop.');
   };
 
   const stopCountText = `${Math.min(currentStopIndex + 1, day.stops.length)} of ${day.stops.length}`;
@@ -384,6 +452,14 @@ function TripPlayer({
     () => day.stops.reduce((sum, stop) => sum + stop.estimatedDurationMinutes, 0),
     [day.stops],
   );
+
+  const handleRecenter = useCallback(async () => {
+    try {
+      await mapControllerRef.current?.moveCamera({zoom: 17});
+    } catch {
+      // Ignore — camera will re-follow on next location update
+    }
+  }, []);
 
   const hint = currentStop
     ? `Next: ${
@@ -395,6 +471,22 @@ function TripPlayer({
       }`
     : '';
 
+  // Full-screen reveal/exploring mode
+  if (
+    (tripState === 'REVEALING' || tripState === 'EXPLORING') &&
+    currentStop
+  ) {
+    return (
+      <RevealScreen
+        stop={currentStop}
+        stopNumber={currentStopIndex + 1}
+        totalStops={day.stops.length}
+        onReadyToGo={continueJourney}
+        isLastStop={currentStopIndex + 1 >= day.stops.length}
+      />
+    );
+  }
+
   return (
     <View style={styles.navContainer}>
       <NavigationView
@@ -403,12 +495,11 @@ function TripPlayer({
         onMapViewControllerCreated={mapController => {
           mapControllerRef.current = mapController;
           try {
-            mapController.setZoomGesturesEnabled(false);
             mapController.setScrollGesturesEnabled(false);
             mapController.setRotateGesturesEnabled(false);
             mapController.setTiltGesturesEnabled(false);
           } catch {
-            // no-op
+            // no-op — methods may not exist in all SDK versions
           }
         }}
       />
@@ -427,24 +518,7 @@ function TripPlayer({
             style={styles.primaryButton}
             onPress={startGuidanceToCurrentStop}
             disabled={isBusy || !isNavReady || !resumeChecked}>
-            <Text style={styles.primaryButtonText}>Let’s Go</Text>
-          </TouchableOpacity>
-        </View>
-      ) : null}
-
-      {tripState === 'REVEALED' && currentStop ? (
-        <View style={styles.revealCard}>
-          <Text style={styles.revealTitle}>{currentStop.name}</Text>
-          <View style={styles.typeBadge}>
-            <Icon name="map-marker-star-outline" size={16} color="#fff" />
-            <Text style={styles.typeBadgeText}>{currentStop.type.toUpperCase()}</Text>
-          </View>
-          <Text style={styles.revealBody}>{currentStop.description}</Text>
-          <Text style={styles.revealBody}>
-            Spend about {currentStop.estimatedDurationMinutes} minutes here.
-          </Text>
-          <TouchableOpacity style={styles.primaryButton} onPress={continueJourney}>
-            <Text style={styles.primaryButtonText}>Continue Journey</Text>
+            <Text style={styles.primaryButtonText}>Let's Go</Text>
           </TouchableOpacity>
         </View>
       ) : null}
@@ -460,10 +534,23 @@ function TripPlayer({
       ) : null}
 
       {tripState === 'NAVIGATING' ? (
-        <View style={styles.bottomBar}>
-          <Text style={styles.bottomBarText}>Stop {stopCountText}</Text>
-          <Text style={styles.bottomBarHint}>{hint}</Text>
-        </View>
+        <>
+          <TouchableOpacity style={styles.recenterButton} onPress={handleRecenter}>
+            <Icon name="crosshairs-gps" size={22} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.bottomBar}>
+            <Text style={styles.bottomBarText}>Stop {stopCountText}</Text>
+            <Text style={styles.bottomBarHint}>{hint}</Text>
+          </View>
+          {isNearStop ? (
+            <TouchableOpacity
+              style={styles.imHereButton}
+              onPress={triggerReveal}>
+              <Icon name="map-marker-check" size={20} color="#fff" />
+              <Text style={styles.imHereText}>I'm Here</Text>
+            </TouchableOpacity>
+          ) : null}
+        </>
       ) : null}
 
       <TouchableOpacity style={styles.backButton} onPress={onExit}>
@@ -682,6 +769,34 @@ const styles = StyleSheet.create({
   bottomBarHint: {
     color: '#404348',
     marginTop: 2,
+  },
+  recenterButton: {
+    position: 'absolute',
+    right: 14,
+    bottom: 70,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(17,17,20,0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imHereButton: {
+    position: 'absolute',
+    left: 14,
+    bottom: 70,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#e94560',
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  imHereText: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 15,
   },
   backButton: {
     position: 'absolute',

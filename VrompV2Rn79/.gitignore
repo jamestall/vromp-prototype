@@ -76,3 +76,4 @@ yarn-error.log
 
 # iOS local secrets
 ios/.env.local
+ios/Secrets.xcconfig
