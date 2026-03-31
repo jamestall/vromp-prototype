@@ -159,6 +159,24 @@ function TripPlayer({
   const [isNearStop, setIsNearStop] = useState(false);
   const mapControllerRef = useRef<any>(null);
 
+  const lockMapGestures = useCallback(() => {
+    const mapController = mapControllerRef.current;
+    if (!mapController) {
+      return;
+    }
+
+    try {
+      mapController.setScrollGesturesEnabled?.(false);
+      mapController.setScrollGesturesEnabledDuringRotateOrZoom?.(false);
+      mapController.setRotateGesturesEnabled?.(false);
+      mapController.setTiltGesturesEnabled?.(false);
+      mapController.setZoomGesturesEnabled?.(true);
+      mapController.setZoomControlsEnabled?.(true);
+    } catch {
+      // no-op — methods may not exist in all SDK versions
+    }
+  }, []);
+
   // Velocity tracking refs (not state — no re-render needed)
   const lastPositionRef = useRef<{lat: number; lng: number; time: number} | null>(null);
   const lowSpeedStartRef = useRef<number | null>(null);
@@ -351,6 +369,7 @@ function TripPlayer({
       }
 
       await planAndStart();
+      lockMapGestures();
 
       // Reset tracking state
       lastPositionRef.current = null;
@@ -365,6 +384,7 @@ function TripPlayer({
         await withTimeout(navigationController.cleanup(), 'Navigation reset');
         await withTimeout(navigationController.init(), 'Navigation re-init');
         await planAndStart();
+        lockMapGestures();
 
         lastPositionRef.current = null;
         lowSpeedStartRef.current = null;
@@ -385,6 +405,7 @@ function TripPlayer({
     currentStopIndex,
     isBusy,
     isNavReady,
+    lockMapGestures,
     navigationController,
     persistProgress,
     visitedStops,
@@ -545,13 +566,8 @@ function TripPlayer({
         onNavigationViewControllerCreated={() => {}}
         onMapViewControllerCreated={mapController => {
           mapControllerRef.current = mapController;
-          try {
-            mapController.setScrollGesturesEnabled(false);
-            mapController.setRotateGesturesEnabled(false);
-            mapController.setTiltGesturesEnabled(false);
-          } catch {
-            // no-op — methods may not exist in all SDK versions
-          }
+          lockMapGestures();
+          setTimeout(lockMapGestures, 300);
         }}
       />
 
@@ -852,7 +868,7 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     right: 12,
-    top: 10,
+    top: 60,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
