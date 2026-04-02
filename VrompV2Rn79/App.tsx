@@ -25,7 +25,7 @@ import RevealScreen from './RevealScreen';
 const PROGRESS_KEY = 'vromp.progress.v1';
 
 // Velocity trigger constants
-const NEAR_STOP_RADIUS_METERS = 150;
+const NEAR_STOP_RADIUS_METERS = 300;
 const LOW_SPEED_THRESHOLD_MS = 2.2; // 5 mph in m/s
 const LOW_SPEED_DURATION_MS = 15000;
 
@@ -328,10 +328,17 @@ function TripPlayer({
     };
 
     const planAndStart = async () => {
-      const waypoint = {
-        title: currentStop.id,
-        position: {lat: currentStop.latitude, lng: currentStop.longitude},
-      };
+      const hasNavigateTo =
+        typeof currentStop.navigateTo === 'string' && currentStop.navigateTo.trim().length > 0;
+
+      const waypoint = hasNavigateTo
+        ? {
+            title: currentStop.navigateTo,
+          }
+        : {
+            title: currentStop.id,
+            position: {lat: currentStop.latitude, lng: currentStop.longitude},
+          };
 
       const routingOptions = {
         travelMode: TravelMode.DRIVING,
@@ -432,12 +439,22 @@ function TripPlayer({
           {lat: currentStop.latitude, lng: currentStop.longitude},
         );
 
-        if (meters > NEAR_STOP_RADIUS_METERS) {
+        const isApproachTrigger = currentStop.revealTrigger === 'approach';
+        const geofenceRadius = isApproachTrigger
+          ? 500
+          : currentStop.arrivalRadiusMeters || NEAR_STOP_RADIUS_METERS;
+
+        if (meters > geofenceRadius) {
           // Outside geofence — reset everything
           setIsNearStop(false);
           lowSpeedStartRef.current = null;
+        } else if (isApproachTrigger) {
+          // Scenic approach trigger: fire immediately when entering geofence
+          setIsNearStop(true);
+          triggerReveal();
+          return;
         } else {
-          // Inside 150m geofence
+          // Park-and-arrive trigger: require low-speed dwell
           setIsNearStop(true);
 
           // Compute speed from last position
