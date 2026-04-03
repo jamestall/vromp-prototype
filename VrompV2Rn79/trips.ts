@@ -61,31 +61,519 @@ export const TRIPS: {families: TripFamily[]} = {
       id: 'fords',
       name: 'The Fords',
       days: [
-        {
-          id: 'fords-day1',
-          label: 'Nashville → St. Louis',
-          stops: [
-            {
-              id: 'fords-day1-stop1',
-              name: 'TBD Ford Stop 1',
-              subtitle: 'TBD',
-              revealEmoji: '📍',
-              hook: 'TBD — hook goes here.',
-              whatToDo: ['TBD — action steps go here.'],
-              proTips: ['TBD — pro tips go here.'],
-              context: 'TBD — context goes here.',
-              latitude: 36.1627,
-              longitude: -86.7816,
-              type: 'scenic',
-              estimatedDurationMinutes: 20,
-              arrivalRadiusMeters: 200,
-              suggestedDuration: '20 min',
-              costNote: 'TBD',
-              hoursToday: 'TBD',
-            },
-          ],
-        },
-      ],
+          {
+                    "id": "fords-day3-cave-to-louisville",
+                    "label": "Mammoth Cave → Louisville",
+                    "stops": [
+                              {
+                                        "id": "wigwam-village",
+                                        "name": "Wigwam Village No. 2",
+                                        "subtitle": "Kitsch, Architecture",
+                                        "revealEmoji": "📸",
+                                        "hook": "One of only three surviving Wigwam motels in the United States. Fifteen concrete teepees, built in 1937, each one a guest room with original furniture.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Photo stop only — don't need to go inside. The Cozy Cone Motel from Pixar's Cars was modeled on the sister location in Holbrook, AZ. Kids will recognize the shape. Quick 5-min stop on the way out of Cave City."
+                                        ],
+                                        "context": "Photo stop only — don't need to go inside. The Cozy Cone Motel from Pixar's Cars was modeled on the sister location in Holbrook, AZ. Kids will recognize the shape. Quick 5-min stop on the way out of Cave City.",
+                                        "latitude": 37.1367,
+                                        "longitude": -85.9569,
+                                        "address": "601 N Dixie Hwy, Cave City, KY 42127",
+                                        "navigateTo": "601 N Dixie Hwy, Cave City, KY 42127",
+                                        "revealTrigger": "park",
+                                        "type": "kitsch",
+                                        "estimatedDurationMinutes": 5,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "5 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Exterior always visible. Active motel — be respectful of guests."
+                              },
+                              {
+                                        "id": "lincoln-birthplace",
+                                        "name": "Abraham Lincoln Birthplace National Historical Park",
+                                        "subtitle": "History, National Park",
+                                        "revealEmoji": "📜",
+                                        "hook": "The birthplace of Abraham Lincoln, marked by a neoclassical marble memorial building housing a symbolic log cabin. Fifty-six steps lead to the entrance — one for each year of Lincoln's life.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Free admission. Open daily 9 AM–5 PM. Visitor center has Junior Ranger booklets. The memorial was built 1909-1911 with donations from over 100,000 people. Teddy Roosevelt laid the cornerstone. Walk the 56 steps, see the …"
+                                        ],
+                                        "context": "Free admission. Open daily 9 AM–5 PM. Visitor center has Junior Ranger booklets. The memorial was built 1909-1911 with donations from over 100,000 people. Teddy Roosevelt laid the cornerstone. Walk the 56 steps, see the cabin, 20-25 min is plenty. This is the first stop in a Lincoln thread that continues Tuesday at his boyhood home in Indiana and Wednesday with his law career statue in Illinois.",
+                                        "latitude": 37.5329,
+                                        "longitude": -85.7337,
+                                        "address": "2995 Lincoln Farm Rd, Hodgenville, KY 42748",
+                                        "navigateTo": "2995 Lincoln Farm Rd, Hodgenville, KY 42748",
+                                        "revealTrigger": "park",
+                                        "type": "history",
+                                        "estimatedDurationMinutes": 25,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "25 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Daily 9 AM–5 PM year-round. Closed Thanksgiving, Christmas, New Year's."
+                              },
+                              {
+                                        "id": "bernheim-forest",
+                                        "name": "Bernheim Forest — Tin Man + Forest Giant",
+                                        "subtitle": "Art, Sculpture",
+                                        "revealEmoji": "🎨",
+                                        "hook": "A 16,000-acre forest and arboretum hiding giant sculptures among the trees. A 27-foot metal Tin Man watches over restored habitats, and a family of wooden trolls — built from recycled Louisville Slugger bats, bourbon barrels, and local scrap wood — waits to be discovered.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "⚠️ TWO LOCATIONS INSIDE THE PARK — navigate to the main entrance, pay suggested donation ($15/car), then: 1) Drive to the Olmsted Ponds area near the Visitor Center to see Little Nis (a wooden troll gazing at his reflect…"
+                                        ],
+                                        "context": "⚠️ TWO LOCATIONS INSIDE THE PARK — navigate to the main entrance, pay suggested donation ($15/car), then: 1) Drive to the Olmsted Ponds area near the Visitor Center to see Little Nis (a wooden troll gazing at his reflection in the pond — closest troll to the road, most photogenic). 2) Then drive to the Jackson-Yoe trailhead to see 'Heart of the Forest' — a 27-ft Tin Man sculpture by Bill Secunda, accessed via a short accessible concrete path. Total time for both: 20-30 min. Skip the full 2-mile troll loop to save time. ⚠️ VERIFY TROLLS ARE STILL STANDING — they were built from organic materials in 2019 and expected to last 3-5 years. Tin Man is permanent (installed July 2025).",
+                                        "latitude": 37.918,
+                                        "longitude": -85.662,
+                                        "address": "2075 Clermont Rd, Clermont, KY 40110",
+                                        "navigateTo": "2075 Clermont Rd, Clermont, KY 40110",
+                                        "revealTrigger": "park",
+                                        "type": "art",
+                                        "estimatedDurationMinutes": 25,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "25 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Daily 7 AM–5 PM (hours may extend in summer). Closed Thanksgiving, Christmas Eve/Day, New Year's Eve/Day."
+                              },
+                              {
+                                        "id": "bardstown-proximity",
+                                        "name": "Bardstown, Kentucky",
+                                        "subtitle": "Proximity Notification",
+                                        "revealEmoji": "📍",
+                                        "hook": "You're passing through Bardstown — named the Most Beautiful Small Town in America by Rand McNally. Over 200 buildings on the National Register of Historic Places. Worth a wander if you're ever back this way.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "NO STOP REQUIRED. This is a proximity notification only — trigger when within 2 miles of downtown Bardstown. The town is the heart of Kentucky's bourbon country but also has a gorgeous historic downtown, My Old Kentucky …"
+                                        ],
+                                        "context": "NO STOP REQUIRED. This is a proximity notification only — trigger when within 2 miles of downtown Bardstown. The town is the heart of Kentucky's bourbon country but also has a gorgeous historic downtown, My Old Kentucky Home State Park, and the 1800s Talbott Inn. Plant a seed for a future trip.",
+                                        "latitude": 37.8092,
+                                        "longitude": -85.4669,
+                                        "address": "Downtown Bardstown, KY",
+                                        "navigateTo": "Downtown Bardstown, KY",
+                                        "revealTrigger": "park",
+                                        "type": "activity",
+                                        "estimatedDurationMinutes": 20,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "20 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "N/A — notification only"
+                              },
+                              {
+                                        "id": "ark-encounter",
+                                        "name": "Ark Encounter",
+                                        "subtitle": "Museum, Attraction",
+                                        "revealEmoji": "📍",
+                                        "hook": "A full-size Noah's Ark built to the dimensions described in the Bible. 510 feet long, 85 feet wide, 51 feet tall. Three decks of exhibits.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Kids 10 and under FREE in 2026. Parking $15. No advance tickets needed. Also has a zoo and zip lines (extra cost). Open Mon-Sat 9 AM–5:30 PM. ⚠️ THIS IS A KNOWN STOP — the Fords planned this themselves. The Vromp surpris…"
+                                        ],
+                                        "context": "Kids 10 and under FREE in 2026. Parking $15. No advance tickets needed. Also has a zoo and zip lines (extra cost). Open Mon-Sat 9 AM–5:30 PM. ⚠️ THIS IS A KNOWN STOP — the Fords planned this themselves. The Vromp surprise is the stops BEFORE the Ark, not the Ark itself. Reveal content should be minimal — they already know what this is.",
+                                        "latitude": 38.6437,
+                                        "longitude": -84.5791,
+                                        "address": "1 Ark Encounter Dr, Williamstown, KY 41097",
+                                        "navigateTo": "1 Ark Encounter Dr, Williamstown, KY 41097",
+                                        "revealTrigger": "park",
+                                        "type": "history",
+                                        "estimatedDurationMinutes": 150,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "150 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Mon-Sat 9:00 AM–5:30 PM, Sun 1:00–7:00 PM"
+                              }
+                    ]
+          },
+          {
+                    "id": "fords-day5-louisville-to-stl",
+                    "label": "Louisville → St. Louis",
+                    "stops": [
+                              {
+                                        "id": "santa-claus-museum",
+                                        "name": "Santa Claus Museum & Village",
+                                        "subtitle": "Kitsch, History",
+                                        "revealEmoji": "📜",
+                                        "hook": "You've arrived in a town literally named Santa Claus. Every street is Christmas-themed — Christmas Boulevard, Holiday Boulevard, Candy Cane Lane. This free museum preserves the town's bizarre history, from its 1856 founding to the decades of children's letters addressed to Santa Claus, Indiana.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Free admission. 22-ft, 40-ton concrete Santa statue from 1935 ('dedicated to the children of the world'). Original Santa Claus Post Office — kids can write letters to Santa and get a handwritten reply by Christmas. 1880 …"
+                                        ],
+                                        "context": "Free admission. 22-ft, 40-ton concrete Santa statue from 1935 ('dedicated to the children of the world'). Original Santa Claus Post Office — kids can write letters to Santa and get a handwritten reply by Christmas. 1880 Santa Claus Church with original furnishings. The reveal here is the town itself — Christmas in April. ⚠️ HOURS: Tue/Wed/Fri/Sat 10 AM–2 PM ONLY. Wednesday works but they must arrive before 2 PM. This is a TIME-GATED stop.",
+                                        "latitude": 38.12,
+                                        "longitude": -86.914,
+                                        "address": "69 N State Rd 245, Santa Claus, IN 47579",
+                                        "navigateTo": "69 N State Rd 245, Santa Claus, IN 47579",
+                                        "revealTrigger": "park",
+                                        "type": "kitsch",
+                                        "estimatedDurationMinutes": 30,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "30 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Tue/Wed/Fri/Sat 10 AM–2 PM. Closed Mon/Thu/Sun. ⚠️ VERIFY HOURS before trip."
+                              },
+                              {
+                                        "id": "lincoln-boyhood",
+                                        "name": "Lincoln Boyhood National Memorial",
+                                        "subtitle": "History, National Park",
+                                        "revealEmoji": "📜",
+                                        "hook": "The farm where Abraham Lincoln grew from age 7 to 21. Fourteen years of frontier Indiana shaped the man who would save the Union. His mother, Nancy Hanks Lincoln, is buried here — she died when Abe was just nine years old.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "NPS site. Limestone memorial with five sculpted panels. 16-min film in the visitor center. The Living Historical Farm has rangers in period clothing working a 1820s homestead — cabin, livestock, gardens, split-rail fence…"
+                                        ],
+                                        "context": "NPS site. Limestone memorial with five sculpted panels. 16-min film in the visitor center. The Living Historical Farm has rangers in period clothing working a 1820s homestead — cabin, livestock, gardens, split-rail fences. Farm staffed mid-April through September, noon–3 PM. Trail of Twelve Stones: walking path with stones from buildings important in Lincoln's life. Junior Ranger program. This is the SECOND Lincoln stop (after the Birthplace on Monday). The reveal should call back: 'Two days ago you stood where Lincoln was born. Now you're standing where he grew up.' ⚠️ Visitor Center hours: Wed–Sun 9 AM–12 PM, 1–3 PM (closed for lunch). Wednesday works.",
+                                        "latitude": 38.1172,
+                                        "longitude": -86.9963,
+                                        "address": "3027 E South St, Lincoln City, IN 47552",
+                                        "navigateTo": "3027 E South St, Lincoln City, IN 47552",
+                                        "revealTrigger": "park",
+                                        "type": "history",
+                                        "estimatedDurationMinutes": 35,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "35 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Visitor Center: Wed–Sun 9 AM–12 PM, 1–3 PM. Grounds: daily dawn–dusk. Farm staffed mid-April–September."
+                              },
+                              {
+                                        "id": "travelers-chapel",
+                                        "name": "The Traveler's Chapel",
+                                        "subtitle": "Kitsch, Roadside",
+                                        "revealEmoji": "📸",
+                                        "hook": "A tiny log cabin church on stilts, next to a gas station, built to serve weary travelers. Too small for pews — just a kneeling board, a cross, and Bible verses on plywood walls.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Right off the I-64 Nashville exit at Hwy 127. Zero detour. ⚠️ ACCESS HAS BEEN INCONSISTENT — was fenced off for years with no trespassing signs. A January 2024 report says it's open again. Verify on arrival. If fenced, i…"
+                                        ],
+                                        "context": "Right off the I-64 Nashville exit at Hwy 127. Zero detour. ⚠️ ACCESS HAS BEEN INCONSISTENT — was fenced off for years with no trespassing signs. A January 2024 report says it's open again. Verify on arrival. If fenced, it's still visible and photo-worthy from the road. 2-3 min stop max.",
+                                        "latitude": 38.344,
+                                        "longitude": -89.381,
+                                        "address": "Hwy 127 at I-64 exit, Nashville, IL 62263",
+                                        "navigateTo": "Hwy 127 at I-64 exit, Nashville, IL 62263",
+                                        "revealTrigger": "park",
+                                        "type": "kitsch",
+                                        "estimatedDurationMinutes": 3,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "3 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Always visible. Access may be restricted — verify on arrival."
+                              },
+                              {
+                                        "id": "lincoln-statue-mt-vernon",
+                                        "name": "Abraham Lincoln Statue & Appellate Courthouse",
+                                        "subtitle": "History, Art",
+                                        "revealEmoji": "📜",
+                                        "hook": "A nine-foot bronze of a beardless, stovepipe-hat-wearing Lincoln standing at ground level — no pedestal, you stand right next to him. He's depicted at the age he argued a landmark railroad tax case at this very courthouse in 1859.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Sculpted by Alan Cottrill, unveiled 2008. The 1857 Appellate Courthouse is still a working court — free tours if you call ahead, but a quick photo with the statue is fine. This is the THIRD Lincoln stop across three stat…"
+                                        ],
+                                        "context": "Sculpted by Alan Cottrill, unveiled 2008. The 1857 Appellate Courthouse is still a working court — free tours if you call ahead, but a quick photo with the statue is fine. This is the THIRD Lincoln stop across three states (KY birthplace → IN boyhood → IL law career). The reveal should tie the thread together: 'Born in Kentucky. Raised in Indiana. And right here in Illinois, he became a lawyer who would change the world.'",
+                                        "latitude": 38.3174,
+                                        "longitude": -88.908,
+                                        "address": "1400 Main St (14th & Main), Mount Vernon, IL 62864",
+                                        "navigateTo": "1400 Main St (14th & Main), Mount Vernon, IL 62864",
+                                        "revealTrigger": "park",
+                                        "type": "history",
+                                        "estimatedDurationMinutes": 5,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "5 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Exterior always accessible. Courthouse tours by appointment only."
+                              },
+                              {
+                                        "id": "road-sign-art",
+                                        "name": "Road Sign Art Sculpture",
+                                        "subtitle": "Art, Kitsch",
+                                        "revealEmoji": "🎨",
+                                        "hook": "A chaotic jumble of highway signs and one traffic light, deliberately assembled as outdoor art in front of a municipal building. No explanatory plaque. It might be a commentary on the stress of modern road travel. Or maybe it's just art.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "In front of the Municipal West Building. ~3 miles from the Lincoln statue — combine both in one Mount Vernon stop. Quick photo op. The meta-humor of a road sign sculpture encountered during a road trip is peak Vromp."
+                                        ],
+                                        "context": "In front of the Municipal West Building. ~3 miles from the Lincoln statue — combine both in one Mount Vernon stop. Quick photo op. The meta-humor of a road sign sculpture encountered during a road trip is peak Vromp.",
+                                        "latitude": 38.323,
+                                        "longitude": -88.92,
+                                        "address": "200 Potomac Blvd, Mount Vernon, IL 62864",
+                                        "navigateTo": "200 Potomac Blvd, Mount Vernon, IL 62864",
+                                        "revealTrigger": "park",
+                                        "type": "art",
+                                        "estimatedDurationMinutes": 3,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "3 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Always accessible"
+                              },
+                              {
+                                        "id": "ufo-alien-shiloh",
+                                        "name": "UFO Alien & Bigfoot Statues",
+                                        "subtitle": "Kitsch, Roadside",
+                                        "revealEmoji": "📜",
+                                        "hook": "A space alien statue with an official 'Confirmed UFO Sighting' historical marker, plus a Bigfoot statue with its own plaque. All outside a bargain store in suburban Illinois.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Based on a real event: on January 5, 2000 at 4:23 AM, multiple police officers from four towns (Lebanon, Shiloh, Millstadt, Dupo) reported a huge, silent, triangular craft with bright lights. National Geographic televise…"
+                                        ],
+                                        "context": "Based on a real event: on January 5, 2000 at 4:23 AM, multiple police officers from four towns (Lebanon, Shiloh, Millstadt, Dupo) reported a huge, silent, triangular craft with bright lights. National Geographic televised a special. Sufjan Stevens wrote a song about it. The marker is outside Norm's Bargain Barn. I-64 exit 16, south on Green Mt Rd, left on Lebanon Ave. ~15 min from Cahokia Mounds — combine on the approach to St. Louis.",
+                                        "latitude": 38.5473,
+                                        "longitude": -89.9252,
+                                        "address": "3518 Lebanon Ave, Belleville, IL 62221",
+                                        "navigateTo": "3518 Lebanon Ave, Belleville, IL 62221",
+                                        "revealTrigger": "park",
+                                        "type": "kitsch",
+                                        "estimatedDurationMinutes": 5,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "5 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Always accessible (outdoor statues)"
+                              },
+                              {
+                                        "id": "catsup-bottle",
+                                        "name": "World's Largest Catsup Bottle",
+                                        "subtitle": "Kitsch, Roadside",
+                                        "revealEmoji": "📸",
+                                        "hook": "A 170-foot water tower painted and shaped to look like a Brooks catsup bottle. Built in 1949, restored, and now on the National Register of Historic Places.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Drive-by or quick pull-over photo. It's a water tower — you can see it from the road. Right near Cahokia Mounds, combine these stops."
+                                        ],
+                                        "context": "Drive-by or quick pull-over photo. It's a water tower — you can see it from the road. Right near Cahokia Mounds, combine these stops.",
+                                        "latitude": 38.6706,
+                                        "longitude": -89.9976,
+                                        "address": "800 S Morrison Ave, Collinsville, IL 62234",
+                                        "navigateTo": "800 S Morrison Ave, Collinsville, IL 62234",
+                                        "revealTrigger": "park",
+                                        "type": "kitsch",
+                                        "estimatedDurationMinutes": 2,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "2 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Always visible"
+                              },
+                              {
+                                        "id": "cahokia-mounds",
+                                        "name": "Cahokia Mounds State Historic Site",
+                                        "subtitle": "History, Nature",
+                                        "revealEmoji": "📜",
+                                        "hook": "A UNESCO World Heritage Site. The largest pre-Columbian city north of Mexico. At its peak around 1100 AD, 10,000–20,000 people lived here — larger than London at the time. Monks Mound, the largest prehistoric earthwork in the Americas, rises 100 feet above the surrounding plain.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Free admission, no parking fee. Climb Monks Mound (the main event — stairs to the top, views of the St. Louis Arch in the distance). Woodhenge is a reconstructed wooden-post astronomical observatory. ⚠️ INTERPRETIVE CENT…"
+                                        ],
+                                        "context": "Free admission, no parking fee. Climb Monks Mound (the main event — stairs to the top, views of the St. Louis Arch in the distance). Woodhenge is a reconstructed wooden-post astronomical observatory. ⚠️ INTERPRETIVE CENTER CLOSED FOR RENOVATIONS as of 2026. Monks Mound and north-side trails still open. Download the 'Cahokia AR Tour' app for virtual exhibits. Grounds open dawn to dusk. Only portable restrooms available (at Monks Mound parking lot). Budget 30 min for the mound climb and a quick look around.",
+                                        "latitude": 38.6553,
+                                        "longitude": -90.0615,
+                                        "address": "30 Ramey St, Collinsville, IL 62234",
+                                        "navigateTo": "30 Ramey St, Collinsville, IL 62234",
+                                        "revealTrigger": "park",
+                                        "type": "history",
+                                        "estimatedDurationMinutes": 30,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "30 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Grounds: daily dawn–dusk. Interpretive Center: CLOSED for renovations. Verify status before trip."
+                              }
+                    ]
+          },
+          {
+                    "id": "fords-day7-stl-friday-vromp",
+                    "label": "St. Louis half day",
+                    "stops": [
+                              {
+                                        "id": "stl-abbey",
+                                        "name": "Saint Louis Abbey Church",
+                                        "subtitle": "Architecture, Sacred",
+                                        "revealEmoji": "🎨",
+                                        "hook": "A Benedictine abbey whose church looks like nothing you've ever seen. Three tiers of whitewashed parabolic concrete arches appear to float upward from the grass. Designed by Gyo Obata of HOK with Pier Luigi Nervi consulting. It launched HOK, now the world's largest architectural practice.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Walk the exterior to appreciate the arches. If the church interior is open, step inside — the translucent fiberglass panels create an ethereal glow. 14th-century Madonna sculpture, nine-ton granite altar under the oculus…"
+                                        ],
+                                        "context": "Walk the exterior to appreciate the arches. If the church interior is open, step inside — the translucent fiberglass panels create an ethereal glow. 14th-century Madonna sculpture, nine-ton granite altar under the oculus. The monks voted to donate their air conditioning fundraising money to charity instead of installing AC. Founded by monks from Ampleforth Abbey in Yorkshire, England. The 150-acre campus is open to visitors. 10-15 min stop. ⚠️ Be respectful — this is an active monastery and parish. Check for service times to avoid interrupting Mass.",
+                                        "latitude": 38.656,
+                                        "longitude": -90.422,
+                                        "address": "500 S Mason Rd, Creve Coeur, MO 63141",
+                                        "navigateTo": "500 S Mason Rd, Creve Coeur, MO 63141",
+                                        "revealTrigger": "park",
+                                        "type": "art",
+                                        "estimatedDurationMinutes": 12,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "12 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Grounds always accessible. Church interior open outside of service times."
+                              },
+                              {
+                                        "id": "hindu-temple-stl",
+                                        "name": "Hindu Temple of St. Louis",
+                                        "subtitle": "Culture, Sacred",
+                                        "revealEmoji": "📍",
+                                        "hook": "A Hindu temple with an ornate gopuram (entrance tower) sculpted by artisans from Chennai, India. Multiple shrines inside honor Vishnu, Siva, Lakshmi, and other deities. The temple also has a cafeteria serving traditional Indian food.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "⚠️ REMOVE SHOES before entering. Dress modestly (no shorts above the knee, cover shoulders). This is an active place of worship — be quiet and respectful inside. The gopuram exterior is visually stunning and can be appre…"
+                                        ],
+                                        "context": "⚠️ REMOVE SHOES before entering. Dress modestly (no shorts above the knee, cover shoulders). This is an active place of worship — be quiet and respectful inside. The gopuram exterior is visually stunning and can be appreciated from the parking lot. If the family is comfortable going inside, the shrines are beautiful and the priests are welcoming to respectful visitors. 15-20 min. ⚠️ FRIDAY HOURS: 9 AM–12 PM, then closed until 5 PM. Must arrive before noon.",
+                                        "latitude": 38.594,
+                                        "longitude": -90.544,
+                                        "address": "725 Weidman Rd, Ballwin, MO 63011",
+                                        "navigateTo": "725 Weidman Rd, Ballwin, MO 63011",
+                                        "revealTrigger": "park",
+                                        "type": "history",
+                                        "estimatedDurationMinutes": 15,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "15 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Mon-Fri: 9 AM–12 PM, 5 PM–8 PM. Sat-Sun: 9 AM–8 PM."
+                              },
+                              {
+                                        "id": "transportation-museum",
+                                        "name": "National Museum of Transportation",
+                                        "subtitle": "Museum, History",
+                                        "revealEmoji": "📜",
+                                        "hook": "A 42-acre museum with the largest collection of steam locomotives in the United States. Over 190 major exhibits including 100+ locomotives, vintage cars (narrated by Jay Leno), aircraft, and a boat. Miniature train rides and trolley rides available.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Kids will love climbing around the massive locomotives, riding the miniature train, and ringing the bells. Route 66 100th Anniversary Exhibition running in 2026. Also features West Barretts Tunnel — built in 1853, one of…"
+                                        ],
+                                        "context": "Kids will love climbing around the massive locomotives, riding the miniature train, and ringing the bells. Route 66 100th Anniversary Exhibition running in 2026. Also features West Barretts Tunnel — built in 1853, one of the first railroad tunnels west of the Mississippi. Free parking. Budget 60-90 min — there's a LOT to see. ⚠️ VERIFY HOURS for Friday April 10. Yelp shows daily 9 AM–4 PM.",
+                                        "latitude": 38.5731,
+                                        "longitude": -90.4629,
+                                        "address": "2933 Barrett Station Rd, Kirkwood, MO 63122",
+                                        "navigateTo": "2933 Barrett Station Rd, Kirkwood, MO 63122",
+                                        "revealTrigger": "park",
+                                        "type": "history",
+                                        "estimatedDurationMinutes": 75,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "75 min",
+                                        "costNote": "~$8/person",
+                                        "hoursToday": "Typically 9 AM–4 PM daily. Hours vary by season — verify at tnmot.org."
+                              },
+                              {
+                                        "id": "laumeier-sculpture-park",
+                                        "name": "Laumeier Sculpture Park",
+                                        "subtitle": "Art, Sculpture",
+                                        "revealEmoji": "🎨",
+                                        "hook": "One of the first and largest sculpture parks in the country. 105 acres with over 70 large-scale outdoor sculptures scattered across meadows and wooded trails. The star attraction is Tony Tasset's 'Eye' — a 12-foot-diameter hyper-realistic fiberglass eyeball that stares back at you.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "Free admission. Open daily 7 AM to dusk. Dog friendly. The eyeball is near the entrance — walk to the right (south side) of the building. 1.4-mile walking trail through the full park if they want more. The eye is simulta…"
+                                        ],
+                                        "context": "Free admission. Open daily 7 AM to dusk. Dog friendly. The eyeball is near the entrance — walk to the right (south side) of the building. 1.4-mile walking trail through the full park if they want more. The eye is simultaneously funny, beautiful, and slightly unsettling. Great photo op. 30-45 min depending on how much trail they walk.",
+                                        "latitude": 38.548,
+                                        "longitude": -90.441,
+                                        "address": "12580 Rott Rd, Sunset Hills, MO 63127",
+                                        "navigateTo": "12580 Rott Rd, Sunset Hills, MO 63127",
+                                        "revealTrigger": "park",
+                                        "type": "art",
+                                        "estimatedDurationMinutes": 35,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "35 min",
+                                        "costNote": "Varies",
+                                        "hoursToday": "Daily 7 AM–dusk. Indoor gallery hours may differ."
+                              },
+                              {
+                                        "id": "balkan-treat-box",
+                                        "name": "Balkan Treat Box",
+                                        "subtitle": "Food, Balkan",
+                                        "revealEmoji": "🍽️",
+                                        "hook": "A James Beard Award finalist restaurant serving contemporary Balkan street food. Spit-roasted chicken döner, handmade beef cevapi, wood-fired pide and somun bread baked fresh daily. Led by chef Loryn Nalic, inspired by Bosnia and the Balkans.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "⚠️ ARRIVE EARLY. By 11:30 the line is out the door. Order at the counter. They add 15% service charge. Get the doner and cevapi — both are outstanding. The somun bread alone is worth the visit. Vegetarian options availab…"
+                                        ],
+                                        "context": "⚠️ ARRIVE EARLY. By 11:30 the line is out the door. Order at the counter. They add 15% service charge. Get the doner and cevapi — both are outstanding. The somun bread alone is worth the visit. Vegetarian options available. Open Mon-Sun 11 AM–8 PM. Budget 45-50 min including wait and eating.",
+                                        "latitude": 38.577,
+                                        "longitude": -90.361,
+                                        "address": "8103 Big Bend Blvd, Webster Groves, MO 63119",
+                                        "navigateTo": "8103 Big Bend Blvd, Webster Groves, MO 63119",
+                                        "revealTrigger": "park",
+                                        "type": "food",
+                                        "estimatedDurationMinutes": 50,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "50 min",
+                                        "costNote": "~$18/person",
+                                        "hoursToday": "Daily 11 AM–8 PM"
+                              },
+                              {
+                                        "id": "ted-drewes",
+                                        "name": "Ted Drewes Frozen Custard",
+                                        "subtitle": "Food, Dessert",
+                                        "revealEmoji": "🍽️",
+                                        "hook": "A St. Louis institution since 1929, sitting right on Route 66. Famous for the 'concrete' — frozen custard so thick they flip the cup upside down to prove it won't fall out. Twelve walk-up windows, neon signs, families everywhere.",
+                                        "whatToDo": [
+                                                  "Arrive and explore the stop highlights.",
+                                                  "Use Ready to Go when you are done to continue."
+                                        ],
+                                        "proTips": [
+                                                  "The Chippewa Street location is the Route 66 original. Lines look long but move fast. Order a concrete with mix-ins (Strawberry Shortcake and Turtle are local favorites). Watch them flip it upside down. Gift shop next do…"
+                                        ],
+                                        "context": "The Chippewa Street location is the Route 66 original. Lines look long but move fast. Order a concrete with mix-ins (Strawberry Shortcake and Turtle are local favorites). Watch them flip it upside down. Gift shop next door has a small museum. This is the perfect final stop — sweet, fun, and quintessentially St. Louis. Back downtown in 20 min. ⚠️ Cash and card accepted. Open until at least 10:30 PM.",
+                                        "latitude": 38.59,
+                                        "longitude": -90.301,
+                                        "address": "6726 Chippewa St, St. Louis, MO 63109",
+                                        "navigateTo": "6726 Chippewa St, St. Louis, MO 63109",
+                                        "revealTrigger": "park",
+                                        "type": "food",
+                                        "estimatedDurationMinutes": 15,
+                                        "arrivalRadiusMeters": 300,
+                                        "suggestedDuration": "15 min",
+                                        "costNote": "~$7/person",
+                                        "hoursToday": "Seasonal — typically opens mid-February, closes sometime in December. Open daily when in season. Verify at teddrewes.com."
+                              }
+                    ]
+          }
+],
     },
     {
       id: 'billings',
