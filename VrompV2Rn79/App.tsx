@@ -21,7 +21,15 @@ import {
   TravelMode,
   useNavigation,
 } from '@googlemaps/react-native-navigation-sdk';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {
+  ArrowRight,
+  Check,
+  CircleDot,
+  List,
+  MapPinCheck,
+  Square,
+  X,
+} from 'lucide-react-native';
 import {TRIPS, type TripDay, type TripFamily} from './trips';
 import RevealScreen from './RevealScreen';
 
@@ -803,7 +811,7 @@ function TripPlayer({
 
           {isWithinManualRange ? (
             <TouchableOpacity style={styles.imHereButton} onPress={triggerManualReveal}>
-              <Icon name="map-marker-check" size={20} color="#fff" />
+              <MapPinCheck size={20} color="#fff" />
               <Text style={styles.imHereText}>I'm Here</Text>
             </TouchableOpacity>
           ) : null}
@@ -815,19 +823,19 @@ function TripPlayer({
           <TouchableOpacity style={styles.menuSheet} activeOpacity={1} onPress={() => {}}>
             <View style={styles.menuHandle} />
             <TouchableOpacity style={styles.menuItem} onPress={() => { setIsMenuOpen(false); setIsListOpen(true); }}>
-              <Icon name="format-list-bulleted" size={20} color="#f4f4f4" />
+              <List size={20} color="#f4f4f4" />
               <Text style={styles.menuItemText}>View list</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.menuItem, currentStopIndex >= day.stops.length - 1 && styles.menuItemDisabled]}
               onPress={skipCurrentStop}
               disabled={currentStopIndex >= day.stops.length - 1}>
-              <Icon name="arrow-right" size={20} color="#f4f4f4" />
+              <ArrowRight size={20} color="#f4f4f4" />
               <Text style={styles.menuItemText}>Skip stop</Text>
             </TouchableOpacity>
             <View style={styles.menuDivider} />
             <TouchableOpacity style={styles.menuItem} onPress={endNavigation}>
-              <Icon name="stop-circle-outline" size={20} color="#e24b4a" />
+              <Square size={20} color="#e24b4a" />
               <Text style={styles.menuItemDangerText}>End navigation</Text>
             </TouchableOpacity>
           </TouchableOpacity>
@@ -842,7 +850,7 @@ function TripPlayer({
               <Text style={styles.listHeaderTitle}>{day.label}</Text>
             </View>
             <TouchableOpacity style={styles.listCloseButton} onPress={() => setIsListOpen(false)}>
-              <Icon name="close" size={20} color="#fff" />
+              <X size={20} color="#fff" />
             </TouchableOpacity>
           </View>
           <FlatList
@@ -870,8 +878,8 @@ function TripPlayer({
                     </Text>
                   </View>
                   <View>
-                    {isRevealed ? <Icon name="check" size={18} color="#1D9E75" /> : null}
-                    {isCurrent ? <Icon name="record-circle" size={18} color="#1D9E75" /> : null}
+                    {isRevealed ? <Check size={18} color="#1D9E75" /> : null}
+                    {isCurrent ? <CircleDot size={18} color="#1D9E75" /> : null}
                     {isMeal ? <Text style={styles.rowTag}>meal</Text> : null}
                     {isLodging ? <Text style={styles.rowTag}>lodging</Text> : null}
                   </View>

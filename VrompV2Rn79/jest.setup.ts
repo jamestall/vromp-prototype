@@ -9,7 +9,16 @@ jest.mock('react-native-keep-awake', () => ({
   deactivate: jest.fn(),
 }));
 
-jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
+jest.mock('lucide-react-native', () => {
+  const React = require('react');
+  const MockIcon = (props: any) => React.createElement('Icon', props);
+  return new Proxy(
+    {},
+    {
+      get: () => MockIcon,
+    },
+  );
+});
 
 jest.mock('@googlemaps/react-native-navigation-sdk', () => {
   const navigationController = {

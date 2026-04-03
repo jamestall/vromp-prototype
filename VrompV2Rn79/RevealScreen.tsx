@@ -7,7 +7,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {
+  AlertCircle,
+  Camera,
+  Clock3,
+  DollarSign,
+  ParkingCircle,
+  Store,
+  UtensilsCrossed,
+} from 'lucide-react-native';
 import type {TripStop} from './trips';
 
 type RevealScreenProps = {
@@ -23,12 +31,12 @@ type TabName = 'whatToDo' | 'proTips' | 'story';
 const CONDITIONAL_BLOCKS: {
   key: keyof TripStop;
   label: string;
-  icon: string;
+  icon: React.ComponentType<{size?: number; color?: string}>;
 }[] = [
-  {key: 'whatToOrder', label: 'What to Order', icon: 'silverware-fork-knife'},
-  {key: 'photoTips', label: 'Photo Tips', icon: 'camera'},
-  {key: 'parkingNotes', label: 'Parking', icon: 'parking'},
-  {key: 'safetyNotes', label: 'Safety', icon: 'alert-circle-outline'},
+  {key: 'whatToOrder', label: 'What to Order', icon: UtensilsCrossed},
+  {key: 'photoTips', label: 'Photo Tips', icon: Camera},
+  {key: 'parkingNotes', label: 'Parking', icon: ParkingCircle},
+  {key: 'safetyNotes', label: 'Safety', icon: AlertCircle},
 ];
 
 export default function RevealScreen({
@@ -120,17 +128,20 @@ export default function RevealScreen({
     }
     return (
       <View style={s.conditionalContainer}>
-        {blocks.map(block => (
-          <View key={block.key} style={s.conditionalCard}>
-            <View style={s.conditionalHeader}>
-              <Icon name={block.icon} size={16} color="#e94560" />
-              <Text style={s.conditionalLabel}>{block.label}</Text>
+        {blocks.map(block => {
+          const BlockIcon = block.icon;
+          return (
+            <View key={block.key} style={s.conditionalCard}>
+              <View style={s.conditionalHeader}>
+                <BlockIcon size={16} color="#e94560" />
+                <Text style={s.conditionalLabel}>{block.label}</Text>
+              </View>
+              <Text style={s.conditionalText}>
+                {String(stop[block.key])}
+              </Text>
             </View>
-            <Text style={s.conditionalText}>
-              {String(stop[block.key])}
-            </Text>
-          </View>
-        ))}
+          );
+        })}
       </View>
     );
   };
@@ -259,17 +270,17 @@ export default function RevealScreen({
           {/* Practical strip */}
           <View style={s.practicalStrip}>
             <View style={s.practicalItem}>
-              <Icon name="clock-outline" size={16} color="#d1d3dc" />
+              <Clock3 size={16} color="#d1d3dc" />
               <Text style={s.practicalText}>{stop.suggestedDuration}</Text>
             </View>
             <View style={s.practicalDivider} />
             <View style={s.practicalItem}>
-              <Icon name="cash" size={16} color="#d1d3dc" />
+              <DollarSign size={16} color="#d1d3dc" />
               <Text style={s.practicalText}>{stop.costNote}</Text>
             </View>
             <View style={s.practicalDivider} />
             <View style={s.practicalItem}>
-              <Icon name="store-clock-outline" size={16} color="#d1d3dc" />
+              <Store size={16} color="#d1d3dc" />
               <Text style={s.practicalText}>{stop.hoursToday}</Text>
             </View>
           </View>
