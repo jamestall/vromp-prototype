@@ -7,7 +7,8 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "geocode:trip": "node scripts/geocode-trip.mjs"
   },
   "dependencies": {
     "@googlemaps/react-native-navigation-sdk": "^0.9.3",

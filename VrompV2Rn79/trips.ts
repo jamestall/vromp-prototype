@@ -15,7 +15,10 @@ export type TripStop = {
   subtitle: string;
   latitude: number;
   longitude: number;
+  address?: string;
   navigateTo?: string;
+  googlePlaceId?: string | null;
+  coordinatesSource?: 'pending_geocode' | 'google_geocoding_api' | 'raw_coordinates' | 'geocode_failed';
   revealTrigger?: 'park' | 'approach';
   type: StopType;
   arrivalRadiusMeters: number;

@@ -389,18 +389,27 @@ function TripPlayer({
     const planAndStart = async () => {
       const hasNavigateTo =
         typeof currentStop.navigateTo === 'string' && currentStop.navigateTo.trim().length > 0;
+      const hasPlaceId =
+        typeof currentStop.googlePlaceId === 'string' && currentStop.googlePlaceId.trim().length > 0;
 
-      const waypoint = hasNavigateTo
+      const waypoint = hasPlaceId
         ? {
-            // Keep explicit coordinates for reliable SDK routing, while showing
-            // the address string as the waypoint title.
-            title: currentStop.navigateTo,
-            position: {lat: currentStop.latitude, lng: currentStop.longitude},
+            title: currentStop.navigateTo || currentStop.name,
+            placeID: currentStop.googlePlaceId,
           }
-        : {
-            title: currentStop.id,
-            position: {lat: currentStop.latitude, lng: currentStop.longitude},
-          };
+        : hasNavigateTo
+          ? {
+              title: currentStop.navigateTo,
+              position: {lat: currentStop.latitude, lng: currentStop.longitude},
+            }
+          : {
+              title: currentStop.id,
+              position: {lat: currentStop.latitude, lng: currentStop.longitude},
+            };
+
+      if (!hasPlaceId && !hasNavigateTo) {
+        console.warn(`[vromp] Falling back to raw coordinates for stop ${currentStop.id}`);
+      }
 
       const routingOptions = {
         travelMode: TravelMode.DRIVING,
@@ -838,7 +847,6 @@ function TripPlayer({
         <SafeAreaView style={styles.listRoot}>
           <View style={styles.listHeader}>
             <View>
-              <Text style={styles.listHeaderSubtitle}>DAY</Text>
               <Text style={styles.listHeaderTitle}>{day.label}</Text>
             </View>
             <TouchableOpacity style={styles.listCloseButton} onPress={() => setIsListOpen(false)}>
@@ -1076,9 +1084,9 @@ const styles = StyleSheet.create({
   },
   controlsBar: {
     position: 'absolute',
-    left: 12,
     right: 12,
-    top: 112,
+    top: 154,
+    width: 266,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1120,10 +1128,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(8,8,10,0.92)',
+    backgroundColor: 'rgba(8,8,10,0.94)',
     paddingHorizontal: 14,
-    paddingTop: 10,
-    paddingBottom: 14,
+    paddingTop: 12,
+    paddingBottom: 24,
+    minHeight: 106,
   },
   etaPrimaryText: {
     color: '#fff',
@@ -1138,7 +1147,7 @@ const styles = StyleSheet.create({
   imHereButton: {
     position: 'absolute',
     left: 14,
-    bottom: 90,
+    bottom: 118,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -1222,11 +1231,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  listHeaderSubtitle: {
-    color: '#b4b8c5',
-    fontSize: 12,
-    fontWeight: '700',
-  },
+
   listHeaderTitle: {
     color: '#fff',
     fontSize: 36,
