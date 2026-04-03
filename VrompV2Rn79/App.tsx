@@ -392,7 +392,10 @@ function TripPlayer({
 
       const waypoint = hasNavigateTo
         ? {
+            // Keep explicit coordinates for reliable SDK routing, while showing
+            // the address string as the waypoint title.
             title: currentStop.navigateTo,
+            position: {lat: currentStop.latitude, lng: currentStop.longitude},
           }
         : {
             title: currentStop.id,
@@ -645,14 +648,23 @@ function TripPlayer({
   );
 
   const openGasSearch = useCallback(async () => {
+    setIsFindingGas(true);
+    const appUrl = 'comgooglemaps://?q=gas+station+near+me';
+    const webUrl = 'https://maps.google.com/?q=gas+station+near+me';
+
     try {
-      setIsFindingGas(true);
-      const appUrl = 'comgooglemaps://?q=gas+station+near+me';
-      const webUrl = 'https://maps.google.com/?q=gas+station+near+me';
       const canOpenApp = await Linking.canOpenURL(appUrl);
-      await Linking.openURL(canOpenApp ? appUrl : webUrl);
+      if (canOpenApp) {
+        await Linking.openURL(appUrl);
+      } else {
+        await Linking.openURL(webUrl);
+      }
     } catch {
-      Alert.alert('Gas search unavailable', 'Unable to open Google Maps right now.');
+      try {
+        await Linking.openURL(webUrl);
+      } catch {
+        Alert.alert('Gas search unavailable', 'Unable to open Google Maps right now.');
+      }
     } finally {
       setIsFindingGas(false);
     }
@@ -774,10 +786,10 @@ function TripPlayer({
                 style={styles.iconCircleButton}
                 onPress={openGasSearch}
                 disabled={isFindingGas}>
-                <Icon name="gas-station-outline" size={18} color="#fff" />
+                <Text style={styles.iconCircleText}>GAS</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.iconCircleButton} onPress={() => setIsMenuOpen(true)}>
-                <Icon name="dots-vertical" size={18} color="#fff" />
+                <Text style={styles.iconCircleText}>⋮</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1097,6 +1109,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.16)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  iconCircleText: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 12,
   },
   etaCard: {
     position: 'absolute',
