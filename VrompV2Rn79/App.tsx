@@ -2,6 +2,9 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Alert,
+  FlatList,
+  Linking,
+  Modal,
   PermissionsAndroid,
   Platform,
   SafeAreaView,
@@ -32,6 +35,8 @@ const LOW_SPEED_DURATION_MS = 15000;
 type DayProgress = {
   currentStopIndex: number;
   visitedStops: string[];
+  skippedStops?: string[];
+  events?: Array<{event: string; stopId?: string; timestamp: string}>;
   startedAt: string;
   tripState?: string; // persist EXPLORING so we can resume without replaying animation
 };
@@ -153,10 +158,19 @@ function TripPlayer({
   const [tripState, setTripState] = useState<TripState>('IDLE');
   const [currentStopIndex, setCurrentStopIndex] = useState(0);
   const [visitedStops, setVisitedStops] = useState<string[]>([]);
+  const [skippedStops, setSkippedStops] = useState<string[]>([]);
+  const [events, setEvents] = useState<Array<{event: string; stopId?: string; timestamp: string}>>([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isListOpen, setIsListOpen] = useState(false);
+  const [etaToNextStop, setEtaToNextStop] = useState<string | null>(null);
+  const [totalEta, setTotalEta] = useState<string | null>(null);
+  const [isFindingGas, setIsFindingGas] = useState(false);
+  const [pendingAutoStart, setPendingAutoStart] = useState(false);
   const [isNavReady, setIsNavReady] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [resumeChecked, setResumeChecked] = useState(false);
-  const [isNearStop, setIsNearStop] = useState(false);
+  const [, setIsNearStop] = useState(false);
+  const [isWithinManualRange, setIsWithinManualRange] = useState(false);
   const mapControllerRef = useRef<any>(null);
 
   const lockMapGestures = useCallback(() => {
@@ -183,21 +197,46 @@ function TripPlayer({
 
   const currentStop = day.stops[currentStopIndex];
 
+  const formatEta = (seconds: number) => {
+    if (!Number.isFinite(seconds) || seconds <= 0) {
+      return null;
+    }
+    const totalMin = Math.round(seconds / 60);
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    if (h > 0) {
+      return `${h} hr ${m} min`;
+    }
+    return `${m} min`;
+  };
+
+  const logEvent = useCallback((event: string, stopId?: string) => {
+    setEvents(prev => [...prev, {event, stopId, timestamp: new Date().toISOString()}]);
+  }, []);
+
   const persistProgress = useCallback(
-    async (nextIndex: number, nextVisited: string[], state?: string) => {
+    async (
+      nextIndex: number,
+      nextVisited: string[],
+      state?: string,
+      nextSkipped: string[] = skippedStops,
+      nextEvents: Array<{event: string; stopId?: string; timestamp: string}> = events,
+    ) => {
       const raw = await AsyncStorage.getItem(PROGRESS_KEY);
       const current = raw ? (JSON.parse(raw) as ProgressMap) : {};
 
       current[day.id] = {
         currentStopIndex: nextIndex,
         visitedStops: nextVisited,
+        skippedStops: nextSkipped,
+        events: nextEvents,
         startedAt: current[day.id]?.startedAt ?? new Date().toISOString(),
         tripState: state,
       };
 
       await AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(current));
     },
-    [day.id],
+    [day.id, events, skippedStops],
   );
 
   const clearProgress = useCallback(async () => {
@@ -254,6 +293,8 @@ function TripPlayer({
 
       if (dayProgress.visitedStops.length >= day.stops.length) {
         setVisitedStops(dayProgress.visitedStops);
+        setSkippedStops(dayProgress.skippedStops ?? []);
+        setEvents(dayProgress.events ?? []);
         setCurrentStopIndex(day.stops.length);
         setTripState('TRIP_COMPLETE');
         setResumeChecked(true);
@@ -267,6 +308,8 @@ function TripPlayer({
           onPress: async () => {
             await clearProgress();
             setVisitedStops([]);
+            setSkippedStops([]);
+            setEvents([]);
             setCurrentStopIndex(0);
             setTripState('IDLE');
             setResumeChecked(true);
@@ -276,6 +319,8 @@ function TripPlayer({
           text: 'Resume',
           onPress: () => {
             setVisitedStops(dayProgress.visitedStops);
+            setSkippedStops(dayProgress.skippedStops ?? []);
+            setEvents(dayProgress.events ?? []);
             setCurrentStopIndex(dayProgress.currentStopIndex);
             // If was in REVEALING/EXPLORING, resume to EXPLORING (skip animation replay)
             if (
@@ -305,8 +350,22 @@ function TripPlayer({
       // Guidance may already be stopped
     }
     setTripState('REVEALING');
+    logEvent('reveal', currentStop?.id);
     await persistProgress(currentStopIndex, visitedStops, 'REVEALING');
-  }, [tripState, navigationController, persistProgress, currentStopIndex, visitedStops]);
+  }, [
+    currentStop?.id,
+    currentStopIndex,
+    logEvent,
+    navigationController,
+    persistProgress,
+    tripState,
+    visitedStops,
+  ]);
+
+  const triggerManualReveal = useCallback(async () => {
+    logEvent('manual_arrive', currentStop?.id);
+    await triggerReveal();
+  }, [currentStop?.id, logEvent, triggerReveal]);
 
   const startGuidanceToCurrentStop = useCallback(async () => {
     if (isBusy) {
@@ -418,9 +477,18 @@ function TripPlayer({
     visitedStops,
   ]);
 
+  useEffect(() => {
+    if (!pendingAutoStart || tripState !== 'IDLE') {
+      return;
+    }
+    setPendingAutoStart(false);
+    startGuidanceToCurrentStop();
+  }, [pendingAutoStart, startGuidanceToCurrentStop, tripState]);
+
   // Velocity-based arrival detection polling
   useEffect(() => {
     if (tripState !== 'NAVIGATING' || !currentStop || !mapControllerRef.current) {
+      setIsWithinManualRange(false);
       return;
     }
 
@@ -443,6 +511,8 @@ function TripPlayer({
         const geofenceRadius = isApproachTrigger
           ? 500
           : currentStop.arrivalRadiusMeters || NEAR_STOP_RADIUS_METERS;
+
+        setIsWithinManualRange(meters <= 400);
 
         if (meters > geofenceRadius) {
           // Outside geofence — reset everything
@@ -489,6 +559,38 @@ function TripPlayer({
 
     return () => clearInterval(interval);
   }, [currentStop, tripState, triggerReveal]);
+
+  useEffect(() => {
+    if (tripState !== 'NAVIGATING') {
+      setEtaToNextStop(null);
+      return;
+    }
+
+    const updateEta = async () => {
+      try {
+        const timeAndDistance = await navigationController.getCurrentTimeAndDistance?.();
+        const next = formatEta(timeAndDistance?.seconds ?? 0);
+        setEtaToNextStop(next);
+
+        // beta approximation: next-stop eta + remaining stop dwell duration
+        const remainingStops = Math.max(day.stops.length - (currentStopIndex + 1), 0);
+        const remainderMinutes = remainingStops * 20;
+        if (next && timeAndDistance?.seconds) {
+          const totalSec = timeAndDistance.seconds + remainderMinutes * 60;
+          setTotalEta(formatEta(totalSec));
+        } else {
+          setTotalEta(null);
+        }
+      } catch {
+        setEtaToNextStop(null);
+        setTotalEta(null);
+      }
+    };
+
+    updateEta();
+    const interval = setInterval(updateEta, 15000);
+    return () => clearInterval(interval);
+  }, [currentStopIndex, day.stops.length, navigationController, tripState]);
 
   // Transition from REVEALING to EXPLORING (RevealScreen animation handles itself;
   // we just persist the state so resume works)
@@ -542,23 +644,67 @@ function TripPlayer({
     [day.stops],
   );
 
-  const handleRecenter = useCallback(async () => {
+  const openGasSearch = useCallback(async () => {
     try {
-      await mapControllerRef.current?.moveCamera({zoom: 17});
+      setIsFindingGas(true);
+      const appUrl = 'comgooglemaps://?q=gas+station+near+me';
+      const webUrl = 'https://maps.google.com/?q=gas+station+near+me';
+      const canOpenApp = await Linking.canOpenURL(appUrl);
+      await Linking.openURL(canOpenApp ? appUrl : webUrl);
     } catch {
-      // Ignore — camera will re-follow on next location update
+      Alert.alert('Gas search unavailable', 'Unable to open Google Maps right now.');
+    } finally {
+      setIsFindingGas(false);
     }
   }, []);
 
-  const hint = currentStop
-    ? `Next: ${
-        currentStop.type === 'food'
-          ? 'Something delicious'
-          : currentStop.type === 'nature'
-            ? 'A beautiful view'
-            : 'A mystery moment'
-      }`
-    : '';
+  const endNavigation = useCallback(() => {
+    Alert.alert('End navigation?', "This will end today's Vromp trip.", [
+      {text: 'Cancel', style: 'cancel'},
+      {
+        text: 'End',
+        style: 'destructive',
+        onPress: async () => {
+          logEvent('end_navigation', currentStop?.id);
+          try {
+            await navigationController.stopGuidance();
+          } catch {
+            // no-op
+          }
+          await persistProgress(currentStopIndex, visitedStops, 'IDLE');
+          onExit();
+        },
+      },
+    ]);
+  }, [currentStop?.id, currentStopIndex, logEvent, navigationController, onExit, persistProgress, visitedStops]);
+
+  const skipCurrentStop = useCallback(() => {
+    if (!currentStop || currentStopIndex >= day.stops.length - 1) {
+      return;
+    }
+
+    Alert.alert('Skip this stop?', "You'll head straight to the next one.", [
+      {text: 'Cancel', style: 'cancel'},
+      {
+        text: 'Skip',
+        style: 'destructive',
+        onPress: async () => {
+          const nextSkipped = Array.from(new Set([...skippedStops, currentStop.id]));
+          const nextEvents = [
+            ...events,
+            {event: 'skip_stop', stopId: currentStop.id, timestamp: new Date().toISOString()},
+          ];
+          setSkippedStops(nextSkipped);
+          setEvents(nextEvents);
+          setCurrentStopIndex(prev => prev + 1);
+          setTripState('IDLE');
+          setPendingAutoStart(true);
+          setIsMenuOpen(false);
+          await persistProgress(currentStopIndex + 1, visitedStops, 'IDLE', nextSkipped, nextEvents);
+        },
+      },
+    ]);
+  }, [currentStop, currentStopIndex, day.stops.length, events, persistProgress, skippedStops, visitedStops]);
 
   // Full-screen reveal/exploring mode
   if (
@@ -619,17 +765,32 @@ function TripPlayer({
 
       {tripState === 'NAVIGATING' ? (
         <>
-          <TouchableOpacity style={styles.recenterButton} onPress={handleRecenter}>
-            <Icon name="crosshairs-gps" size={22} color="#fff" />
-          </TouchableOpacity>
-          <View style={styles.bottomBar}>
-            <Text style={styles.bottomBarText}>Stop {stopCountText}</Text>
-            <Text style={styles.bottomBarHint}>{hint}</Text>
+          <View style={styles.controlsBar}>
+            <View style={styles.stopPill}>
+              <Text style={styles.stopPillText}>Stop {stopCountText}</Text>
+            </View>
+            <View style={styles.controlsRight}>
+              <TouchableOpacity
+                style={styles.iconCircleButton}
+                onPress={openGasSearch}
+                disabled={isFindingGas}>
+                <Icon name="gas-station-outline" size={18} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.iconCircleButton} onPress={() => setIsMenuOpen(true)}>
+                <Icon name="dots-vertical" size={18} color="#fff" />
+              </TouchableOpacity>
+            </View>
           </View>
-          {isNearStop ? (
-            <TouchableOpacity
-              style={styles.imHereButton}
-              onPress={triggerReveal}>
+
+          <View style={styles.etaCard}>
+            <Text style={styles.etaPrimaryText}>
+              {etaToNextStop ? `${etaToNextStop} to next stop` : 'ETA to next stop unavailable'}
+            </Text>
+            {totalEta ? <Text style={styles.etaSecondaryText}>~{totalEta} total remaining today</Text> : null}
+          </View>
+
+          {isWithinManualRange ? (
+            <TouchableOpacity style={styles.imHereButton} onPress={triggerManualReveal}>
               <Icon name="map-marker-check" size={20} color="#fff" />
               <Text style={styles.imHereText}>I'm Here</Text>
             </TouchableOpacity>
@@ -637,10 +798,77 @@ function TripPlayer({
         </>
       ) : null}
 
-      <TouchableOpacity style={styles.backButton} onPress={onExit}>
-        <Icon name="arrow-left" size={18} color="#fff" />
-        <Text style={styles.backButtonText}>Back</Text>
-      </TouchableOpacity>
+      <Modal visible={isMenuOpen} transparent animationType="slide" onRequestClose={() => setIsMenuOpen(false)}>
+        <TouchableOpacity style={styles.menuBackdrop} activeOpacity={1} onPress={() => setIsMenuOpen(false)}>
+          <TouchableOpacity style={styles.menuSheet} activeOpacity={1} onPress={() => {}}>
+            <View style={styles.menuHandle} />
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setIsMenuOpen(false); setIsListOpen(true); }}>
+              <Icon name="format-list-bulleted" size={20} color="#f4f4f4" />
+              <Text style={styles.menuItemText}>View list</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.menuItem, currentStopIndex >= day.stops.length - 1 && styles.menuItemDisabled]}
+              onPress={skipCurrentStop}
+              disabled={currentStopIndex >= day.stops.length - 1}>
+              <Icon name="arrow-right" size={20} color="#f4f4f4" />
+              <Text style={styles.menuItemText}>Skip stop</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity style={styles.menuItem} onPress={endNavigation}>
+              <Icon name="stop-circle-outline" size={20} color="#e24b4a" />
+              <Text style={styles.menuItemDangerText}>End navigation</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal visible={isListOpen} animationType="slide" onRequestClose={() => setIsListOpen(false)}>
+        <SafeAreaView style={styles.listRoot}>
+          <View style={styles.listHeader}>
+            <View>
+              <Text style={styles.listHeaderSubtitle}>DAY</Text>
+              <Text style={styles.listHeaderTitle}>{day.label}</Text>
+            </View>
+            <TouchableOpacity style={styles.listCloseButton} onPress={() => setIsListOpen(false)}>
+              <Icon name="close" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={day.stops}
+            keyExtractor={item => item.id}
+            renderItem={({item, index}) => {
+              const isCurrent = index === currentStopIndex && tripState === 'NAVIGATING';
+              const isRevealed = visitedStops.includes(item.id);
+              const isSkipped = skippedStops.includes(item.id);
+              const isFuture = !isCurrent && !isRevealed && !isSkipped;
+              const isMeal = isFuture && item.type === 'food';
+              const isLodging = isFuture && /hotel|lodging|camp/i.test(item.name);
+
+              return (
+                <View style={[styles.listRow, isCurrent && styles.listRowCurrent]}>
+                  <View style={[styles.listIndexBubble, isCurrent && styles.listIndexBubbleCurrent]}>
+                    <Text style={[styles.listIndexText, isCurrent && styles.listIndexTextCurrent]}>{index + 1}</Text>
+                  </View>
+                  <View style={styles.listRowBody}>
+                    <Text style={styles.listRowTitle}>
+                      {isRevealed ? item.name : isCurrent ? 'Current stop' : isSkipped ? 'Skipped' : isMeal ? 'Meal stop' : isLodging ? 'Lodging' : 'Mystery stop'}
+                    </Text>
+                    <Text style={styles.listRowSubtitle}>
+                      {isRevealed ? item.subtitle : isCurrent ? 'Navigating…' : isSkipped ? 'Skipped' : isMeal ? 'Meal' : isLodging ? 'Lodging' : 'Hidden until reveal'}
+                    </Text>
+                  </View>
+                  <View>
+                    {isRevealed ? <Icon name="check" size={18} color="#1D9E75" /> : null}
+                    {isCurrent ? <Icon name="record-circle" size={18} color="#1D9E75" /> : null}
+                    {isMeal ? <Text style={styles.rowTag}>meal</Text> : null}
+                    {isLodging ? <Text style={styles.rowTag}>lodging</Text> : null}
+                  </View>
+                </View>
+              );
+            }}
+          />
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 }
@@ -834,45 +1062,70 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 12,
   },
-  bottomBar: {
+  controlsBar: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(251,251,252,0.98)',
-    borderTopWidth: 1,
-    borderColor: '#c7c9cf',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    left: 12,
+    right: 12,
+    top: 112,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(17,17,20,0.74)',
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
   },
-  bottomBarText: {
-    color: '#111',
+  stopPill: {
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  stopPillText: {
+    color: '#fff',
     fontWeight: '800',
-    fontSize: 18,
+    fontSize: 15,
   },
-  bottomBarHint: {
-    color: '#404348',
-    marginTop: 2,
+  controlsRight: {
+    flexDirection: 'row',
+    gap: 8,
   },
-  recenterButton: {
-    position: 'absolute',
-    right: 14,
-    bottom: 70,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(17,17,20,0.8)',
+  iconCircleButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.16)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  etaCard: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(8,8,10,0.92)',
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 14,
+  },
+  etaPrimaryText: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 30,
+  },
+  etaSecondaryText: {
+    color: '#c5c8d2',
+    marginTop: 2,
+    fontSize: 14,
   },
   imHereButton: {
     position: 'absolute',
     left: 14,
-    bottom: 70,
+    bottom: 90,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#e94560',
+    backgroundColor: '#1D9E75',
     borderRadius: 22,
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -882,20 +1135,131 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 15,
   },
-  backButton: {
-    position: 'absolute',
-    right: 12,
-    top: 60,
+  menuBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  menuSheet: {
+    backgroundColor: '#2b2b2d',
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    paddingHorizontal: 18,
+    paddingTop: 8,
+    paddingBottom: 28,
+  },
+  menuHandle: {
+    width: 44,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#8b8d95',
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+  menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(17,17,20,0.8)',
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    gap: 12,
+    paddingVertical: 14,
   },
-  backButtonText: {
-    color: '#fff',
+  menuItemDisabled: {
+    opacity: 0.5,
+  },
+  menuItemText: {
+    color: '#f4f4f4',
+    fontSize: 22,
+    fontWeight: '600',
+  },
+  menuItemDangerText: {
+    color: '#E24B4A',
+    fontSize: 22,
+    fontWeight: '600',
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#4d4f56',
+  },
+  listRoot: {
+    flex: 1,
+    backgroundColor: '#232B23',
+  },
+  listHeader: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  listHeaderSubtitle: {
+    color: '#b4b8c5',
+    fontSize: 12,
     fontWeight: '700',
+  },
+  listHeaderTitle: {
+    color: '#fff',
+    fontSize: 36,
+    fontWeight: '700',
+  },
+  listCloseButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  listRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  listRowCurrent: {
+    backgroundColor: 'rgba(29,158,117,0.16)',
+  },
+  listIndexBubble: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#dbeee8',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  listIndexBubbleCurrent: {
+    backgroundColor: '#1D9E75',
+  },
+  listIndexText: {
+    color: '#085041',
+    fontWeight: '800',
+  },
+  listIndexTextCurrent: {
+    color: '#fff',
+  },
+  listRowBody: {
+    flex: 1,
+  },
+  listRowTitle: {
+    color: '#fff',
+    fontSize: 30,
+    fontWeight: '600',
+  },
+  listRowSubtitle: {
+    color: '#b8bdc9',
+    marginTop: 2,
+    fontSize: 22,
+  },
+  rowTag: {
+    color: '#d9dce5',
+    backgroundColor: 'rgba(0,0,0,0.32)',
+    borderRadius: 10,
+    overflow: 'hidden',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    fontSize: 12,
+    textTransform: 'lowercase',
   },
 });
