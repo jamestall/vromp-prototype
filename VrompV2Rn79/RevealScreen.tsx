@@ -7,15 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {
-  AlertCircle,
-  Camera,
-  Clock3,
-  DollarSign,
-  ParkingCircle,
-  Store,
-  UtensilsCrossed,
-} from 'lucide-react-native';
+
 import type {TripStop} from './trips';
 
 type RevealScreenProps = {
@@ -31,12 +23,12 @@ type TabName = 'whatToDo' | 'proTips' | 'story';
 const CONDITIONAL_BLOCKS: {
   key: keyof TripStop;
   label: string;
-  icon: React.ComponentType<{size?: number; color?: string}>;
+  icon: string;
 }[] = [
-  {key: 'whatToOrder', label: 'What to Order', icon: UtensilsCrossed},
-  {key: 'photoTips', label: 'Photo Tips', icon: Camera},
-  {key: 'parkingNotes', label: 'Parking', icon: ParkingCircle},
-  {key: 'safetyNotes', label: 'Safety', icon: AlertCircle},
+  {key: 'whatToOrder', label: 'What to Order', icon: '🍽'},
+  {key: 'photoTips', label: 'Photo Tips', icon: '📷'},
+  {key: 'parkingNotes', label: 'Parking', icon: '🅿️'},
+  {key: 'safetyNotes', label: 'Safety', icon: '⚠️'},
 ];
 
 export default function RevealScreen({
@@ -129,11 +121,10 @@ export default function RevealScreen({
     return (
       <View style={s.conditionalContainer}>
         {blocks.map(block => {
-          const BlockIcon = block.icon;
           return (
             <View key={block.key} style={s.conditionalCard}>
               <View style={s.conditionalHeader}>
-                <BlockIcon size={16} color="#e94560" />
+                <Text style={s.conditionalIcon}>{block.icon}</Text>
                 <Text style={s.conditionalLabel}>{block.label}</Text>
               </View>
               <Text style={s.conditionalText}>
@@ -270,17 +261,17 @@ export default function RevealScreen({
           {/* Practical strip */}
           <View style={s.practicalStrip}>
             <View style={s.practicalItem}>
-              <Clock3 size={16} color="#d1d3dc" />
+              <Text style={s.practicalIcon}>⏱</Text>
               <Text style={s.practicalText}>{stop.suggestedDuration}</Text>
             </View>
             <View style={s.practicalDivider} />
             <View style={s.practicalItem}>
-              <DollarSign size={16} color="#d1d3dc" />
+              <Text style={s.practicalIcon}>$</Text>
               <Text style={s.practicalText}>{stop.costNote}</Text>
             </View>
             <View style={s.practicalDivider} />
             <View style={s.practicalItem}>
-              <Store size={16} color="#d1d3dc" />
+              <Text style={s.practicalIcon}>🕒</Text>
               <Text style={s.practicalText}>{stop.hoursToday}</Text>
             </View>
           </View>
@@ -435,6 +426,10 @@ const s = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
+  practicalIcon: {
+    color: '#d1d3dc',
+    fontSize: 14,
+  },
   practicalDivider: {
     width: 1,
     height: 20,
@@ -524,6 +519,9 @@ const s = StyleSheet.create({
     color: '#e94560',
     fontWeight: '700',
     fontSize: 13,
+  },
+  conditionalIcon: {
+    fontSize: 14,
   },
   conditionalText: {
     color: '#d4d8ea',

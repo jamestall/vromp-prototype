@@ -21,15 +21,7 @@ import {
   TravelMode,
   useNavigation,
 } from '@googlemaps/react-native-navigation-sdk';
-import {
-  ArrowRight,
-  Check,
-  CircleDot,
-  List,
-  MapPinCheck,
-  Square,
-  X,
-} from 'lucide-react-native';
+
 import {TRIPS, type TripDay, type TripFamily} from './trips';
 import RevealScreen from './RevealScreen';
 
@@ -811,7 +803,7 @@ function TripPlayer({
 
           {isWithinManualRange ? (
             <TouchableOpacity style={styles.imHereButton} onPress={triggerManualReveal}>
-              <MapPinCheck size={20} color="#fff" />
+              <Text style={styles.menuGlyph}>✓</Text>
               <Text style={styles.imHereText}>I'm Here</Text>
             </TouchableOpacity>
           ) : null}
@@ -823,19 +815,19 @@ function TripPlayer({
           <TouchableOpacity style={styles.menuSheet} activeOpacity={1} onPress={() => {}}>
             <View style={styles.menuHandle} />
             <TouchableOpacity style={styles.menuItem} onPress={() => { setIsMenuOpen(false); setIsListOpen(true); }}>
-              <List size={20} color="#f4f4f4" />
+              <Text style={styles.menuGlyph}>≡</Text>
               <Text style={styles.menuItemText}>View list</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.menuItem, currentStopIndex >= day.stops.length - 1 && styles.menuItemDisabled]}
               onPress={skipCurrentStop}
               disabled={currentStopIndex >= day.stops.length - 1}>
-              <ArrowRight size={20} color="#f4f4f4" />
+              <Text style={styles.menuGlyph}>→</Text>
               <Text style={styles.menuItemText}>Skip stop</Text>
             </TouchableOpacity>
             <View style={styles.menuDivider} />
             <TouchableOpacity style={styles.menuItem} onPress={endNavigation}>
-              <Square size={20} color="#e24b4a" />
+              <Text style={styles.menuGlyphDanger}>■</Text>
               <Text style={styles.menuItemDangerText}>End navigation</Text>
             </TouchableOpacity>
           </TouchableOpacity>
@@ -850,7 +842,7 @@ function TripPlayer({
               <Text style={styles.listHeaderTitle}>{day.label}</Text>
             </View>
             <TouchableOpacity style={styles.listCloseButton} onPress={() => setIsListOpen(false)}>
-              <X size={20} color="#fff" />
+              <Text style={styles.menuGlyph}>✕</Text>
             </TouchableOpacity>
           </View>
           <FlatList
@@ -878,8 +870,8 @@ function TripPlayer({
                     </Text>
                   </View>
                   <View>
-                    {isRevealed ? <Check size={18} color="#1D9E75" /> : null}
-                    {isCurrent ? <CircleDot size={18} color="#1D9E75" /> : null}
+                    {isRevealed ? <Text style={styles.rowIconGood}>✓</Text> : null}
+                    {isCurrent ? <Text style={styles.rowIconGood}>●</Text> : null}
                     {isMeal ? <Text style={styles.rowTag}>meal</Text> : null}
                     {isLodging ? <Text style={styles.rowTag}>lodging</Text> : null}
                   </View>
@@ -1195,6 +1187,20 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '600',
   },
+  menuGlyph: {
+    color: '#f4f4f4',
+    fontSize: 20,
+    width: 22,
+    textAlign: 'center',
+    fontWeight: '700',
+  },
+  menuGlyphDanger: {
+    color: '#E24B4A',
+    fontSize: 16,
+    width: 22,
+    textAlign: 'center',
+    fontWeight: '800',
+  },
   menuItemDangerText: {
     color: '#E24B4A',
     fontSize: 22,
@@ -1286,5 +1292,12 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     fontSize: 12,
     textTransform: 'lowercase',
+  },
+  rowIconGood: {
+    color: '#1D9E75',
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+    minWidth: 18,
   },
 });
