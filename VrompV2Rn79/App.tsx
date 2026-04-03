@@ -842,7 +842,7 @@ function TripPlayer({
               const isSkipped = skippedStops.includes(item.id);
               const isFuture = !isCurrent && !isRevealed && !isSkipped;
               const isMeal = isFuture && item.type === 'food';
-              const isLodging = isFuture && /hotel|lodging|camp/i.test(item.name);
+              const isLodging = isFuture && /hotel|lodging|camp|home/i.test(item.name);
 
               return (
                 <View style={[styles.listRow, isCurrent && styles.listRowCurrent]}>
